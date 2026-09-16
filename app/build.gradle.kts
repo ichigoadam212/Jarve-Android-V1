@@ -2,9 +2,11 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
 android {
     namespace = "com.ichigoadam.jarvis"
     compileSdk = 35
+
     defaultConfig {
         applicationId = "com.ichigoadam.jarvis"
         minSdk = 26
@@ -12,4 +14,9 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.lifecycle:lifecycle-service:2.8.7")
 }
