@@ -5,9 +5,18 @@ import android.content.Intent
 import android.os.IBinder
 
 class GuardianService : Service() {
+    private val guardian = Guardian()
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // V1 foundation: monitoring/restart orchestration will be added here.
+        // Android is responsible for process recreation. Guardian provides
+        // the orchestration boundary and prevents unbounded restart loops.
+        guardian.resetFailures()
         return START_STICKY
+    }
+
+    override fun onDestroy() {
+        // Keep cleanup local; never attempt to control Android system_server.
+        super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
