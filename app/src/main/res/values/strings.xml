@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">JARVIS</string>
+    <string name="accessibility_description">Optional JARVIS interaction service. Enable only when you need cross-app accessibility features.</string>
+</resources>
