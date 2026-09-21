@@ -7,6 +7,7 @@ import com.ichigoadam.jarvis.integration.JarvisAccessibilityService
 import com.ichigoadam.jarvis.memory.CloseChatManager
 import com.ichigoadam.jarvis.memory.StyleProfile
 import com.ichigoadam.jarvis.memory.ReplyGenerator
+import com.ichigoadam.jarvis.memory.ChatStyleProfileStore
 import com.ichigoadam.jarvis.voice.OwnerVoiceGate
 import com.ichigoadam.jarvis.voice.VoiceInput
 import com.ichigoadam.jarvis.voice.VoiceOutput
@@ -23,6 +24,7 @@ class JarvisController(context: Context) {
     private val closeChats = CloseChatManager(context)
     private val styleProfile = StyleProfile(context)
     private val replyGenerator = ReplyGenerator()
+    private val chatStyles = ChatStyleProfileStore(context)
     private val mainHandler = Handler(Looper.getMainLooper())
 
     @Volatile private var active = false
@@ -99,6 +101,7 @@ class JarvisController(context: Context) {
             val history = JarvisAccessibilityService.readCurrentChatHistory()
             if (history.isNotBlank()) {
                 styleProfile.addSample(history)
+                chatStyles.addSample(pkg, chat, history)
                 if (!secretMode) output.speak("تم تحليل سجل الشات وحفظه محلياً")
             } else if (!secretMode) {
                 output.speak("لم أستطع قراءة سجل الشات")
@@ -127,7 +130,8 @@ class JarvisController(context: Context) {
             }
 
             val conversation = JarvisAccessibilityService.readRecentConversation()
-            val generated = replyGenerator.generate(conversation, styleProfile.getSamples())
+            val samples = chatStyles.getSamples(pkg, chat).ifEmpty { styleProfile.getSamples() }
+            val generated = replyGenerator.generate(conversation, samples)
             sendReply(generated)
             return
         }
