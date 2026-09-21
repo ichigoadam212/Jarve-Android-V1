@@ -13,9 +13,27 @@ class JarvisService : Service() {
     companion object {
         private const val CHANNEL_ID = "jarvis_service"
         private const val NOTIFICATION_ID = 1001
+        private const val PREFS = "jarvis_state"
+        private const val KEY_RUNNING = "running"
 
         fun start(context: Context) {
             context.startForegroundService(Intent(context, JarvisService::class.java))
+        }
+
+        fun stop(context: Context) {
+            context.stopService(Intent(context, JarvisService::class.java))
+        }
+
+        fun isRunning(context: Context): Boolean {
+            return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getBoolean(KEY_RUNNING, false)
+        }
+
+        private fun setRunning(context: Context, running: Boolean) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean(KEY_RUNNING, running)
+                .apply()
         }
     }
 
@@ -23,6 +41,7 @@ class JarvisService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        setRunning(this, true)
 
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
@@ -40,7 +59,6 @@ class JarvisService : Service() {
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
-
         controller = JarvisController(this)
     }
 
@@ -48,13 +66,12 @@ class JarvisService : Service() {
         intent: Intent?,
         flags: Int,
         startId: Int
-    ): Int {
-        return START_STICKY
-    }
+    ): Int = START_STICKY
 
     override fun onDestroy() {
         controller?.destroy()
         controller = null
+        setRunning(this, false)
         super.onDestroy()
     }
 
