@@ -65,13 +65,13 @@ class JarvisAccessibilityService : AccessibilityService() {
                 .take(5000)
         }
 
-        fun readCurrentChatHistory(maxPages: Int = 40): String {
+        fun readCurrentChatHistory(maxPages: Int = 25): String {
             val service = instance ?: return ""
             val root = service.rootInActiveWindow ?: return ""
             if (!supportedPackages.contains(root.packageName?.toString())) return ""
 
             val collected = linkedSetOf<String>()
-            repeat(maxPages.coerceIn(1, 60)) {
+            repeat(maxPages.coerceIn(1, 25)) {
                 val page = mutableListOf<String>()
                 service.collectText(root, page)
                 page.map { it.trim() }
@@ -87,7 +87,6 @@ class JarvisAccessibilityService : AccessibilityService() {
                     return@repeat
                 }
 
-                Thread.sleep(120)
             }
 
             // Return the conversation to approximately its original area.
@@ -99,7 +98,6 @@ class JarvisAccessibilityService : AccessibilityService() {
                 if (!target.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
                     return@repeat
                 }
-                Thread.sleep(80)
             }
 
             return collected.joinToString("\n").take(20000)
