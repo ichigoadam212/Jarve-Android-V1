@@ -8,4 +8,11 @@ class WakeWordDetector(
             .split(Regex("\\s+"))
             .any { it == wakeWord }
     }
+
+    fun removeWakeWord(text: String): String {
+        return text.trim()
+            .replace(Regex("(?i)\\bjarvis\\b"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+    }
 }
