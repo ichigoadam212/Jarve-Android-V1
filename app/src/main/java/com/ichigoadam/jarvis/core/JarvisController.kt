@@ -3,6 +3,7 @@ package com.ichigoadam.jarvis.core
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.ichigoadam.jarvis.voice.OwnerVoiceGate
 import com.ichigoadam.jarvis.voice.VoiceInput
 import com.ichigoadam.jarvis.voice.VoiceOutput
 import com.ichigoadam.jarvis.voice.VoiceProfileManager
@@ -10,9 +11,11 @@ import com.ichigoadam.jarvis.voice.WakeWordDetector
 
 class JarvisController(context: Context) {
     private val engine = CommandEngine()
+    private val router = CommandRouter()
     private val wakeWord = WakeWordDetector()
     private val output = VoiceOutput(context)
     private val profiles = VoiceProfileManager(context)
+    private val ownerGate = OwnerVoiceGate()
     private val mainHandler = Handler(Looper.getMainLooper())
 
     @Volatile private var active = false
@@ -24,6 +27,10 @@ class JarvisController(context: Context) {
         onResult = { text -> handleVoice(text) },
         onSessionFinished = { scheduleNextListen() }
     )
+
+    init {
+        ownerGate.setEnrolled(profiles.isOwnerEnrolled())
+    }
 
     private fun handleVoice(text: String) {
         val normalized = text.trim()
@@ -40,8 +47,19 @@ class JarvisController(context: Context) {
         val command = wakeWord.removeWakeWord(normalized)
         if (command.isBlank()) return
 
+        when (router.policyFor(command)) {
+            CommandPolicy.OWNER_ONLY,
+            CommandPolicy.SECRET_OWNER_ONLY -> {
+                // Speaker verification is intentionally not faked here.
+                // These commands remain blocked until a real verifier is connected.
+                if (!ownerGate.authorize(false)) return
+            }
+            CommandPolicy.PUBLIC -> Unit
+        }
+
         val lower = command.lowercase()
-        if (lower == "secret" || lower == "الوضع السري" || lower == "silent" || lower == "صامت") {
+        if (lower == "secret" || lower == "الوضع السري" ||
+            lower == "silent" || lower == "صامت") {
             secretMode = !secretMode
             if (!secretMode) output.speak("تم إيقاف الوضع السري")
             return
@@ -78,10 +96,7 @@ class JarvisController(context: Context) {
         }, 350)
     }
 
-    fun setActive(value: Boolean) {
-        active = value
-    }
-
+    fun setActive(value: Boolean) { active = value }
     fun isActive(): Boolean = active
 
     fun stopListening() {
