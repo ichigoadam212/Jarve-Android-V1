@@ -2,9 +2,18 @@ package com.ichigoadam.jarvis.memory
 
 class StyleAnalyzer {
     fun analyze(samples: List<String>): ReplyStyleProfile {
-        val messages = samples
+        val raw = samples
             .flatMap { it.split("\n".toRegex()) }
             .map { it.trim() }
+            .filter { it.length in 2..300 }
+
+        // Prefer lines that accessibility trees explicitly mark as the owner's
+        // messages. If the app exposes no sender marker, fall back to all lines.
+        val markedOwner = raw
+            .filter { isOwnerMarked(it) }
+            .map { stripOwnerMarker(it) }
+
+        val messages = (markedOwner.ifEmpty { raw })
             .filter { it.length in 2..300 }
 
         if (messages.isEmpty()) return ReplyStyleProfile()
