@@ -6,25 +6,30 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import java.util.Locale
 
 class VoiceInput(
     context: Context,
     private val onResult: (String) -> Unit,
-    private val onError: (Int) -> Unit = {}
+    private val onError: (Int) -> Unit = {},
+    private val onSessionFinished: () -> Unit = {}
 ) {
     private val recognizer = SpeechRecognizer.createSpeechRecognizer(context.applicationContext)
 
     init {
         recognizer.setRecognitionListener(object : RecognitionListener {
             override fun onResults(results: Bundle?) {
-                val text = results
-                    ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     ?.firstOrNull()
-                if (!text.isNullOrBlank()) onResult(text)
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let(onResult)
+                onSessionFinished()
             }
 
-            override fun onError(error: Int) = onError(error)
+            override fun onError(error: Int) {
+                onError(error)
+                onSessionFinished()
+            }
+
             override fun onReadyForSpeech(params: Bundle?) {}
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {}
