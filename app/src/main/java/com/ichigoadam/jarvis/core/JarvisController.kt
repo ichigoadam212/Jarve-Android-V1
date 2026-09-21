@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.ichigoadam.jarvis.integration.JarvisAccessibilityService
+import com.ichigoadam.jarvis.memory.CloseChatManager
+import com.ichigoadam.jarvis.memory.StyleProfile
 import com.ichigoadam.jarvis.voice.OwnerVoiceGate
 import com.ichigoadam.jarvis.voice.VoiceInput
 import com.ichigoadam.jarvis.voice.VoiceOutput
@@ -17,6 +19,8 @@ class JarvisController(context: Context) {
     private val output = VoiceOutput(context)
     private val profiles = VoiceProfileManager(context)
     private val ownerGate = OwnerVoiceGate()
+    private val closeChats = CloseChatManager(context)
+    private val styleProfile = StyleProfile(context)
     private val mainHandler = Handler(Looper.getMainLooper())
 
     @Volatile private var active = false
@@ -57,6 +61,36 @@ class JarvisController(context: Context) {
         }
 
         val lower = command.lowercase()
+
+        if (lower == "add chat to close" || lower == "ضيف الشات للكلوز" ||
+            lower == "ضيف الشات للـكلوز") {
+            val pkg = JarvisAccessibilityService.currentPackage()
+            val chat = JarvisAccessibilityService.currentChatKey()
+            if (pkg.isNotBlank() && chat.isNotBlank()) {
+                closeChats.add(pkg, chat)
+                if (!secretMode) output.speak("تمت إضافة الشات للكلوز")
+            } else if (!secretMode) {
+                output.speak("افتح الشات أولاً ثم أعطني الأمر")
+            }
+            return
+        }
+
+        if (lower == "remove chat from close" || lower == "شيل الشات من الكلوز") {
+            val pkg = JarvisAccessibilityService.currentPackage()
+            val chat = JarvisAccessibilityService.currentChatKey()
+            if (pkg.isNotBlank() && chat.isNotBlank()) {
+                closeChats.remove(pkg, chat)
+                if (!secretMode) output.speak("تمت إزالة الشات من الكلوز")
+            }
+            return
+        }
+
+        if (lower == "teach jarvis my style" || lower == "علم جارفيس أسلوبي") {
+            val visible = JarvisAccessibilityService.readRecentConversation()
+            if (visible.isNotBlank()) styleProfile.addSample(visible)
+            if (!secretMode) output.speak("تم حفظ عينة من أسلوبك محلياً")
+            return
+        }
 
         when {
             lower == "read messages" || lower == "اقرأ الرسائل" ||
@@ -150,7 +184,17 @@ class JarvisController(context: Context) {
     }
 
     private fun sendReply(message: String) {
-        val ok = JarvisAccessibilityService.replyToFocusedInput(message)
+        val pkg = JarvisAccessibilityService.currentPackage()
+        val chat = JarvisAccessibilityService.currentChatKey()
+        val finalMessage = if (
+            pkg.isNotBlank() && chat.isNotBlank() &&
+            closeChats.isClose(pkg, chat)
+        ) {
+            message.trimEnd() + "\n\nتم الرد بواسطة جارفيس"
+        } else {
+            message
+        }
+        val ok = JarvisAccessibilityService.replyToFocusedInput(finalMessage)
         if (secretMode) return
 
         output.speak(
