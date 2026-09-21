@@ -85,10 +85,22 @@ class JarvisController(context: Context) {
             return
         }
 
-        if (lower == "teach jarvis my style" || lower == "علم جارفيس أسلوبي") {
-            val visible = JarvisAccessibilityService.readRecentConversation()
-            if (visible.isNotBlank()) styleProfile.addSample(visible)
-            if (!secretMode) output.speak("تم حفظ عينة من أسلوبك محلياً")
+        if (lower == "teach jarvis my style" || lower == "علم جارفيس أسلوبي" ||
+            lower == "learn this chat" || lower == "اتعلم من الشات") {
+            val pkg = JarvisAccessibilityService.currentPackage()
+            val chat = JarvisAccessibilityService.currentChatKey()
+            if (pkg.isBlank() || chat.isBlank()) {
+                if (!secretMode) output.speak("افتح الشات أولاً")
+                return
+            }
+
+            val history = JarvisAccessibilityService.readCurrentChatHistory()
+            if (history.isNotBlank()) {
+                styleProfile.addSample(history)
+                if (!secretMode) output.speak("تم تحليل سجل الشات وحفظه محلياً")
+            } else if (!secretMode) {
+                output.speak("لم أستطع قراءة سجل الشات")
+            }
             return
         }
 
