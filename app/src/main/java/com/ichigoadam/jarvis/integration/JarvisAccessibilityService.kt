@@ -20,13 +20,50 @@ class JarvisAccessibilityService : AccessibilityService() {
 
         fun isConnected(): Boolean = instance != null
 
+        fun currentPackage(): String {
+            return instance?.rootInActiveWindow?.packageName?.toString().orEmpty()
+        }
+
+        fun currentAppName(): String {
+            return when (currentPackage()) {
+                "com.whatsapp" -> "WhatsApp"
+                "com.instagram.android" -> "Instagram"
+                "com.facebook.katana" -> "Facebook"
+                else -> "تطبيق غير مدعوم"
+            }
+        }
+
         fun readVisibleText(): String {
             val service = instance ?: return ""
-            if (!supportedPackages.contains(service.rootInActiveWindow?.packageName?.toString())) return ""
+            val root = service.rootInActiveWindow ?: return ""
+            if (!supportedPackages.contains(root.packageName?.toString())) return ""
 
             val lines = mutableListOf<String>()
-            service.collectText(service.rootInActiveWindow, lines)
-            return lines.distinct().joinToString("\n").take(4000)
+            service.collectText(root, lines)
+
+            return lines
+                .distinct()
+                .filter { it.length <= 500 }
+                .takeLast(80)
+                .joinToString("\n")
+                .take(5000)
+        }
+
+        fun readRecentConversation(): String {
+            val service = instance ?: return ""
+            val root = service.rootInActiveWindow ?: return ""
+            if (!supportedPackages.contains(root.packageName?.toString())) return ""
+
+            val lines = mutableListOf<String>()
+            service.collectText(root, lines)
+
+            val cleaned = lines
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+                .filter { it.length in 2..500 }
+                .distinct()
+
+            return cleaned.takeLast(20).joinToString("\n").take(3000)
         }
 
         fun replyToFocusedInput(message: String): Boolean {
@@ -34,6 +71,7 @@ class JarvisAccessibilityService : AccessibilityService() {
             val root = service.rootInActiveWindow ?: return false
             val packageName = root.packageName?.toString() ?: return false
             if (!supportedPackages.contains(packageName)) return false
+            if (message.isBlank()) return false
 
             val input = service.findEditable(root) ?: return false
             val args = Bundle().apply {
@@ -43,13 +81,31 @@ class JarvisAccessibilityService : AccessibilityService() {
                 )
             }
 
-            val set = input.performAction(
-                AccessibilityNodeInfo.ACTION_SET_TEXT,
-                args
-            )
-            if (!set) return false
+            if (!input.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
+                return false
+            }
 
             return service.clickSendButton(root)
+        }
+
+        fun openSupportedApp(app: String): Boolean {
+            val service = instance ?: return false
+            val packageName = when (app.lowercase()) {
+                "whatsapp", "واتساب" -> "com.whatsapp"
+                "instagram", "انستجرام", "إنستجرام" -> "com.instagram.android"
+                "facebook", "فيسبوك" -> "com.facebook.katana"
+                else -> return false
+            }
+
+            return try {
+                val intent = service.packageManager.getLaunchIntentForPackage(packageName)
+                    ?: return false
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                service.startActivity(intent)
+                true
+            } catch (_: Exception) {
+                false
+            }
         }
     }
 
@@ -59,30 +115,12 @@ class JarvisAccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // V1 reads content only when Jarvis receives an explicit read/reply command.
-        // No screen or message content is transmitted outside the device.
-    }
-
-    fun openApp(packageName: String): Boolean {
-        return try {
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-                ?: return false
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            true
-        } catch (_: Exception) {
-            false
-        }
-    }
-
-    fun findText(text: String): AccessibilityNodeInfo? {
-        val root = rootInActiveWindow ?: return null
-        return root.findAccessibilityNodeInfosByText(text).firstOrNull()
+        // Content is accessed only after an explicit Jarvis command.
     }
 
     private fun findEditable(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
-        if (node == null) return null
-        if (node.isEditable && node.isVisibleToUser) return node
+        if (node == null || !node.isVisibleToUser) return null
+        if (node.isEditable) return node
 
         for (i in 0 until node.childCount) {
             findEditable(node.getChild(i))?.let { return it }
@@ -99,13 +137,18 @@ class JarvisAccessibilityService : AccessibilityService() {
         for (label in labels) {
             val nodes = root.findAccessibilityNodeInfosByText(label)
             for (node in nodes) {
-                if (node.isVisibleToUser && node.isClickable) {
-                    return node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                if (node.isVisibleToUser && node.isClickable &&
+                    node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                ) {
+                    return true
                 }
+
                 var parent = node.parent
-                repeat(2) {
-                    if (parent != null && parent.isVisibleToUser && parent.isClickable) {
-                        if (parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) return true
+                repeat(3) {
+                    if (parent != null && parent.isVisibleToUser && parent.isClickable &&
+                        parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    ) {
+                        return true
                     }
                     parent = parent?.parent
                 }
