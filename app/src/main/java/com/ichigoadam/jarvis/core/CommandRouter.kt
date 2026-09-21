@@ -28,6 +28,12 @@ class CommandRouter {
         CommandDefinition("reply", CommandPolicy.PUBLIC),
         CommandDefinition("رد", CommandPolicy.PUBLIC),
         CommandDefinition("reply to last", CommandPolicy.PUBLIC),
+        CommandDefinition("reply in my style", CommandPolicy.PUBLIC),
+        CommandDefinition("رد بأسلوبي", CommandPolicy.PUBLIC),
+        CommandDefinition("auto close replies on", CommandPolicy.PUBLIC),
+        CommandDefinition("شغل الرد التلقائي للكلوز", CommandPolicy.PUBLIC),
+        CommandDefinition("auto close replies off", CommandPolicy.PUBLIC),
+        CommandDefinition("اقفل الرد التلقائي للكلوز", CommandPolicy.PUBLIC),
         CommandDefinition("رد على آخر رسالة", CommandPolicy.PUBLIC),
 
         CommandDefinition("open whatsapp", CommandPolicy.PUBLIC),
