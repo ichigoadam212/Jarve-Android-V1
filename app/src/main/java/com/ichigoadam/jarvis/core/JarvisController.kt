@@ -7,7 +7,7 @@ import com.ichigoadam.jarvis.voice.OwnerVoiceGate
 import com.ichigoadam.jarvis.voice.VoiceInput
 import com.ichigoadam.jarvis.voice.VoiceOutput
 import com.ichigoadam.jarvis.voice.VoiceProfileManager
-import com.ichigoadam.jarvis.voice.WakeWordDetector
+import com.ichigoadam.jarvis.voice.WakeWordDetector\nimport com.ichigoadam.jarvis.integration.JarvisAccessibilityService
 
 class JarvisController(context: Context) {
     private val engine = CommandEngine()
@@ -58,6 +58,38 @@ class JarvisController(context: Context) {
         }
 
         val lower = command.lowercase()
+
+        if (lower == "read messages" || lower == "اقرأ الرسائل" ||
+            lower == "read screen" || lower == "اقرأ الشاشة") {
+            val text = JarvisAccessibilityService.readVisibleText()
+            if (!secretMode) {
+                output.speak(if (text.isBlank()) "لا أستطيع قراءة النص من التطبيق الحالي" else text)
+            }
+            return
+        }
+
+        val replyPrefix = when {
+            lower.startsWith("reply ") -> command.substringAfter(" ", "")
+            lower.startsWith("رد ") -> command.substringAfter(" ", "")
+            else -> null
+        }
+
+        if (replyPrefix != null) {
+            val ok = replyPrefix.isNotBlank() &&
+                JarvisAccessibilityService.replyToFocusedInput(replyPrefix)
+            if (!secretMode) {
+                output.speak(
+                    when {
+                        ok -> "تم الإرسال"
+                        !JarvisAccessibilityService.isConnected() ->
+                            "خدمة التحكم في التطبيقات غير مفعلة"
+                        else -> "لم أستطع الإرسال من التطبيق الحالي"
+                    }
+                )
+            }
+            return
+        }
+
         if (lower == "secret" || lower == "الوضع السري" ||
             lower == "silent" || lower == "صامت") {
             secretMode = !secretMode
