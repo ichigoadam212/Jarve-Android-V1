@@ -9,18 +9,31 @@ class JarvisController(context: Context) {
     private val engine = CommandEngine()
     private val wakeWord = WakeWordDetector()
     private val output = VoiceOutput(context)
+
     private val input = VoiceInput(
         context = context,
         onResult = { text -> handleVoice(text) }
     )
 
+    @Volatile
+    private var active = false
+
     private fun handleVoice(text: String) {
-        if (wakeWord.isWakeWord(text)) {
+        val normalized = text.trim()
+        if (normalized.isBlank()) return
+
+        if (wakeWord.isWakeWord(normalized)) {
+            active = true
             output.speak("نعم")
             return
         }
 
-        val result = engine.execute(text)
+        if (!active) return
+
+        val command = wakeWord.removeWakeWord(normalized)
+        if (command.isBlank()) return
+
+        val result = engine.execute(command)
         if (result.handled && result.response.isNotBlank()) {
             output.speak(result.response)
         }
@@ -29,6 +42,12 @@ class JarvisController(context: Context) {
     fun listen() {
         input.startListening()
     }
+
+    fun setActive(value: Boolean) {
+        active = value
+    }
+
+    fun isActive(): Boolean = active
 
     fun destroy() {
         input.destroy()
