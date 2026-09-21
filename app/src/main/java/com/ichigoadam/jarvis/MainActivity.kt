@@ -2,12 +2,14 @@ package com.ichigoadam.jarvis
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.ichigoadam.jarvis.core.JarvisController
+import com.ichigoadam.jarvis.guardian.GuardianService
 
 class MainActivity : Activity() {
     private var controller: JarvisController? = null
@@ -35,10 +37,18 @@ class MainActivity : Activity() {
         }
 
         val start = Button(this).apply {
-            text = "Start JARVIS"
+            text = "Start JARVIS + Guardian"
             setOnClickListener {
+                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
+                    return@setOnClickListener
+                }
+
                 JarvisService.start(this@MainActivity)
-                status.text = "JARVIS Android V1\nStatus: Running"
+                startForegroundService(
+                    Intent(this@MainActivity, GuardianService::class.java)
+                )
+                status.text = "JARVIS Android V1\nStatus: Running + Guardian"
             }
         }
 
