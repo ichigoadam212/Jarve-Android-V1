@@ -65,6 +65,46 @@ class JarvisAccessibilityService : AccessibilityService() {
                 .take(5000)
         }
 
+        fun readCurrentChatHistory(maxPages: Int = 40): String {
+            val service = instance ?: return ""
+            val root = service.rootInActiveWindow ?: return ""
+            if (!supportedPackages.contains(root.packageName?.toString())) return ""
+
+            val collected = linkedSetOf<String>()
+            repeat(maxPages.coerceIn(1, 60)) {
+                val page = mutableListOf<String>()
+                service.collectText(root, page)
+                page.map { it.trim() }
+                    .filter { it.length in 2..500 }
+                    .forEach { collected.add(it) }
+
+                val scrollable = mutableListOf<AccessibilityNodeInfo>()
+                service.collectScrollable(root, scrollable)
+                val target = scrollable.firstOrNull { it.isVisibleToUser }
+                if (target == null ||
+                    !target.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)
+                ) {
+                    return@repeat
+                }
+
+                Thread.sleep(120)
+            }
+
+            // Return the conversation to approximately its original area.
+            repeat(maxPages.coerceIn(1, 60)) {
+                val current = service.rootInActiveWindow ?: return@repeat
+                val scrollable = mutableListOf<AccessibilityNodeInfo>()
+                service.collectScrollable(current, scrollable)
+                val target = scrollable.firstOrNull { it.isVisibleToUser } ?: return@repeat
+                if (!target.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+                    return@repeat
+                }
+                Thread.sleep(80)
+            }
+
+            return collected.joinToString("\n").take(20000)
+        }
+
         fun readRecentConversation(): String {
             val service = instance ?: return ""
             val root = service.rootInActiveWindow ?: return ""
@@ -172,6 +212,17 @@ class JarvisAccessibilityService : AccessibilityService() {
         }
 
         return false
+    }
+
+    private fun collectScrollable(
+        node: AccessibilityNodeInfo?,
+        output: MutableList<AccessibilityNodeInfo>
+    ) {
+        if (node == null || !node.isVisibleToUser) return
+        if (node.isScrollable) output.add(node)
+        for (i in 0 until node.childCount) {
+            collectScrollable(node.getChild(i), output)
+        }
     }
 
     private fun collectText(
