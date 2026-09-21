@@ -83,17 +83,19 @@ class JarvisController(context: Context) {
                 return
             }
 
-            lower.startsWith("reply ") || lower.startsWith("رد ") -> {
-                val message = command.substringAfter(" ", "").trim()
+            lower.startsWith("reply to last ") || lower.startsWith("رد على آخر رسالة ") -> {
+                val message = when {
+                    lower.startsWith("reply to last ") ->
+                        command.substring("reply to last ".length).trim()
+                    else ->
+                        command.substring("رد على آخر رسالة ".length).trim()
+                }
                 sendReply(message)
                 return
             }
 
-            lower.startsWith("reply to last ") || lower.startsWith("رد على آخر رسالة ") -> {
+            lower.startsWith("reply ") || lower.startsWith("رد ") -> {
                 val message = command.substringAfter(" ", "").trim()
-                    .removePrefix("to last ")
-                    .removePrefix("على آخر رسالة ")
-                    .trim()
                 sendReply(message)
                 return
             }
