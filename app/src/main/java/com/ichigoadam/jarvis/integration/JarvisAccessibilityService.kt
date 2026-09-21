@@ -24,6 +24,22 @@ class JarvisAccessibilityService : AccessibilityService() {
             return instance?.rootInActiveWindow?.packageName?.toString().orEmpty()
         }
 
+        fun currentChatKey(): String {
+            val service = instance ?: return ""
+            val root = service.rootInActiveWindow ?: return ""
+            if (!supportedPackages.contains(root.packageName?.toString())) return ""
+
+            val lines = mutableListOf<String>()
+            service.collectText(root, lines)
+            val ignored = setOf(
+                "WhatsApp", "Instagram", "Facebook",
+                "إرسال", "ارسال", "send", "send message"
+            )
+            return lines.map { it.trim() }
+                .firstOrNull { it.length in 2..60 && it !in ignored }
+                .orEmpty()
+        }
+
         fun currentAppName(): String {
             return when (currentPackage()) {
                 "com.whatsapp" -> "WhatsApp"
