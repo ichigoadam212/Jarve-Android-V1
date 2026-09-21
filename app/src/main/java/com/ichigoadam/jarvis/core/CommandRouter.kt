@@ -15,6 +15,13 @@ class CommandRouter {
         CommandDefinition("اقرأ آخر رسالة", CommandPolicy.PUBLIC),
         CommandDefinition("what app", CommandPolicy.PUBLIC),
         CommandDefinition("ما التطبيق", CommandPolicy.PUBLIC),
+        CommandDefinition("add chat to close", CommandPolicy.PUBLIC),
+        CommandDefinition("ضيف الشات للكلوز", CommandPolicy.PUBLIC),
+        CommandDefinition("ضيف الشات للـكلوز", CommandPolicy.PUBLIC),
+        CommandDefinition("remove chat from close", CommandPolicy.PUBLIC),
+        CommandDefinition("شيل الشات من الكلوز", CommandPolicy.PUBLIC),
+        CommandDefinition("teach jarvis my style", CommandPolicy.PUBLIC),
+        CommandDefinition("علم جارفيس أسلوبي", CommandPolicy.PUBLIC),
 
         CommandDefinition("reply", CommandPolicy.PUBLIC),
         CommandDefinition("رد", CommandPolicy.PUBLIC),
