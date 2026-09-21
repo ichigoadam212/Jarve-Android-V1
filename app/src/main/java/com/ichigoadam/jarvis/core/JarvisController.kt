@@ -3,11 +3,12 @@ package com.ichigoadam.jarvis.core
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import com.ichigoadam.jarvis.integration.JarvisAccessibilityService
 import com.ichigoadam.jarvis.voice.OwnerVoiceGate
 import com.ichigoadam.jarvis.voice.VoiceInput
 import com.ichigoadam.jarvis.voice.VoiceOutput
 import com.ichigoadam.jarvis.voice.VoiceProfileManager
-import com.ichigoadam.jarvis.voice.WakeWordDetector\nimport com.ichigoadam.jarvis.integration.JarvisAccessibilityService
+import com.ichigoadam.jarvis.voice.WakeWordDetector
 
 class JarvisController(context: Context) {
     private val engine = CommandEngine()
@@ -50,8 +51,6 @@ class JarvisController(context: Context) {
         when (router.policyFor(command)) {
             CommandPolicy.OWNER_ONLY,
             CommandPolicy.SECRET_OWNER_ONLY -> {
-                // Speaker verification is intentionally not faked here.
-                // These commands remain blocked until a real verifier is connected.
                 if (!ownerGate.authorize(false)) return
             }
             CommandPolicy.PUBLIC -> Unit
@@ -59,53 +58,121 @@ class JarvisController(context: Context) {
 
         val lower = command.lowercase()
 
-        if (lower == "read messages" || lower == "اقرأ الرسائل" ||
-            lower == "read screen" || lower == "اقرأ الشاشة") {
-            val text = JarvisAccessibilityService.readVisibleText()
-            if (!secretMode) {
-                output.speak(if (text.isBlank()) "لا أستطيع قراءة النص من التطبيق الحالي" else text)
+        when {
+            lower == "read messages" || lower == "اقرأ الرسائل" ||
+            lower == "read screen" || lower == "اقرأ الشاشة" -> {
+                speakAppText(JarvisAccessibilityService.readVisibleText())
+                return
             }
-            return
-        }
 
-        val replyPrefix = when {
-            lower.startsWith("reply ") -> command.substringAfter(" ", "")
-            lower.startsWith("رد ") -> command.substringAfter(" ", "")
-            else -> null
-        }
+            lower == "read last message" || lower == "اقرأ آخر رسالة" -> {
+                speakAppText(JarvisAccessibilityService.readRecentConversation())
+                return
+            }
 
-        if (replyPrefix != null) {
-            val ok = replyPrefix.isNotBlank() &&
-                JarvisAccessibilityService.replyToFocusedInput(replyPrefix)
-            if (!secretMode) {
-                output.speak(
-                    when {
-                        ok -> "تم الإرسال"
-                        !JarvisAccessibilityService.isConnected() ->
+            lower == "what app" || lower == "ما التطبيق" -> {
+                if (!secretMode) {
+                    output.speak(
+                        if (JarvisAccessibilityService.isConnected()) {
+                            JarvisAccessibilityService.currentAppName()
+                        } else {
                             "خدمة التحكم في التطبيقات غير مفعلة"
-                        else -> "لم أستطع الإرسال من التطبيق الحالي"
-                    }
-                )
+                        }
+                    )
+                }
+                return
             }
-            return
-        }
 
-        if (lower == "secret" || lower == "الوضع السري" ||
-            lower == "silent" || lower == "صامت") {
-            secretMode = !secretMode
-            if (!secretMode) output.speak("تم إيقاف الوضع السري")
-            return
-        }
+            lower.startsWith("reply ") || lower.startsWith("رد ") -> {
+                val message = command.substringAfter(" ", "").trim()
+                sendReply(message)
+                return
+            }
 
-        if (lower == "stop" || lower == "إيقاف") {
-            active = false
-            if (!secretMode) output.speak("تم الإيقاف")
-            return
+            lower.startsWith("reply to last ") || lower.startsWith("رد على آخر رسالة ") -> {
+                val message = command.substringAfter(" ", "").trim()
+                    .removePrefix("to last ")
+                    .removePrefix("على آخر رسالة ")
+                    .trim()
+                sendReply(message)
+                return
+            }
+
+            lower == "open whatsapp" || lower == "افتح واتساب" -> {
+                openApp("واتساب")
+                return
+            }
+
+            lower == "open instagram" || lower == "افتح انستجرام" ||
+            lower == "افتح إنستجرام" -> {
+                openApp("انستجرام")
+                return
+            }
+
+            lower == "open facebook" || lower == "افتح فيسبوك" -> {
+                openApp("فيسبوك")
+                return
+            }
+
+            lower == "secret" || lower == "الوضع السري" ||
+            lower == "silent" || lower == "صامت" -> {
+                secretMode = !secretMode
+                if (!secretMode) output.speak("تم إيقاف الوضع السري")
+                return
+            }
+
+            lower == "stop" || lower == "إيقاف" -> {
+                active = false
+                if (!secretMode) output.speak("تم الإيقاف")
+                return
+            }
         }
 
         val result = engine.execute(command)
         if (result.handled && result.response.isNotBlank() && !secretMode) {
             output.speak(result.response)
+        }
+    }
+
+    private fun speakAppText(text: String) {
+        if (secretMode) return
+        output.speak(
+            when {
+                !JarvisAccessibilityService.isConnected() ->
+                    "خدمة التحكم في التطبيقات غير مفعلة"
+                text.isBlank() ->
+                    "لا يوجد نص مقروء من التطبيق الحالي"
+                else -> text
+            }
+        )
+    }
+
+    private fun sendReply(message: String) {
+        val ok = JarvisAccessibilityService.replyToFocusedInput(message)
+        if (secretMode) return
+
+        output.speak(
+            when {
+                message.isBlank() -> "قل نص الرد بعد كلمة رد"
+                !JarvisAccessibilityService.isConnected() ->
+                    "خدمة التحكم في التطبيقات غير مفعلة"
+                ok -> "تم الإرسال"
+                else -> "لم أستطع الإرسال من التطبيق الحالي"
+            }
+        )
+    }
+
+    private fun openApp(app: String) {
+        val ok = JarvisAccessibilityService.openSupportedApp(app)
+        if (!secretMode) {
+            output.speak(
+                when {
+                    ok -> "تم فتح $app"
+                    !JarvisAccessibilityService.isConnected() ->
+                        "فعّل خدمة التحكم في التطبيقات أولاً"
+                    else -> "لم أستطع فتح $app"
+                }
+            )
         }
     }
 
