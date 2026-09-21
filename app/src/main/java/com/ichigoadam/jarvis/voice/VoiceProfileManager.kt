@@ -1,17 +1,26 @@
 package com.ichigoadam.jarvis.voice
 
-class VoiceProfileManager {
-    private var ownerProfile = VoiceProfile()
+import android.content.Context
 
-    fun getOwnerProfile(): VoiceProfile = ownerProfile
+class VoiceProfileManager(context: Context) {
+    private val prefs = context.applicationContext
+        .getSharedPreferences("jarvis_voice_profile", Context.MODE_PRIVATE)
 
-    fun enrollOwner(): VoiceProfile {
-        ownerProfile = ownerProfile.copy(enrolled = true)
-        return ownerProfile
+    fun getOwnerProfile(): VoiceProfile {
+        return VoiceProfile(
+            ownerId = "owner",
+            enrolled = prefs.getBoolean("owner_enrolled", false)
+        )
     }
 
+    fun enrollOwner(): VoiceProfile {
+        prefs.edit().putBoolean("owner_enrolled", true).apply()
+        return getOwnerProfile()
+    }
+
+    fun isOwnerEnrolled(): Boolean = getOwnerProfile().enrolled
+
     fun resetNonOwnerProfiles() {
-        // Reserved for future additional voice profiles.
-        // The owner identity is intentionally never removed by this API.
+        // Reserved for future profiles. Owner enrollment is never removed here.
     }
 }
