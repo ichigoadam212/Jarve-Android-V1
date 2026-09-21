@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.provider.Settings
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
@@ -36,6 +37,13 @@ class MainActivity : Activity() {
             }
         }
 
+        val accessibility = Button(this).apply {
+            text = "Enable App Control"
+            setOnClickListener {
+                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            }
+        }
+
         val start = Button(this).apply {
             text = "Start JARVIS + Guardian"
             setOnClickListener {
@@ -56,6 +64,7 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 24, 24, 24)
             addView(status)
+            addView(accessibility)
             addView(start)
             addView(listen)
         })
