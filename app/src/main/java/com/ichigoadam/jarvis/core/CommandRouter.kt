@@ -21,6 +21,8 @@ class CommandRouter {
         CommandDefinition("remove chat from close", CommandPolicy.PUBLIC),
         CommandDefinition("شيل الشات من الكلوز", CommandPolicy.PUBLIC),
         CommandDefinition("teach jarvis my style", CommandPolicy.PUBLIC),
+        CommandDefinition("learn this chat", CommandPolicy.PUBLIC),
+        CommandDefinition("اتعلم من الشات", CommandPolicy.PUBLIC),
         CommandDefinition("علم جارفيس أسلوبي", CommandPolicy.PUBLIC),
 
         CommandDefinition("reply", CommandPolicy.PUBLIC),
