@@ -66,6 +66,23 @@ class JarvisController(context: Context) {
 
         val lower = command.lowercase()
 
+        if (lower == "status" || lower == "الحالة") {
+            if (!secretMode) {
+                val running = JarvisHealthReader.read(context)
+                output.speak(
+                    if (running.running) {
+                        if (running.appControlConnected)
+                            "جارفيس متصل وخدمة التحكم في التطبيقات مفعلة"
+                        else
+                            "جارفيس متصل لكن خدمة التحكم في التطبيقات غير مفعلة"
+                    } else {
+                        "جارفيس غير متصل"
+                    }
+                )
+            }
+            return
+        }
+
         if (lower == "add chat to close" || lower == "ضيف الشات للكلوز" ||
             lower == "ضيف الشات للـكلوز") {
             val pkg = JarvisAccessibilityService.currentPackage()
