@@ -6,6 +6,7 @@ import android.os.Looper
 import com.ichigoadam.jarvis.integration.JarvisAccessibilityService
 import com.ichigoadam.jarvis.memory.CloseChatManager
 import com.ichigoadam.jarvis.memory.StyleProfile
+import com.ichigoadam.jarvis.memory.ReplyGenerator
 import com.ichigoadam.jarvis.voice.OwnerVoiceGate
 import com.ichigoadam.jarvis.voice.VoiceInput
 import com.ichigoadam.jarvis.voice.VoiceOutput
@@ -21,6 +22,7 @@ class JarvisController(context: Context) {
     private val ownerGate = OwnerVoiceGate()
     private val closeChats = CloseChatManager(context)
     private val styleProfile = StyleProfile(context)
+    private val replyGenerator = ReplyGenerator()
     private val mainHandler = Handler(Looper.getMainLooper())
 
     @Volatile private var active = false
@@ -101,6 +103,32 @@ class JarvisController(context: Context) {
             } else if (!secretMode) {
                 output.speak("لم أستطع قراءة سجل الشات")
             }
+            return
+        }
+
+        if (lower == "auto close replies on" || lower == "شغل الرد التلقائي للكلوز") {
+            closeChats.setAutoReply(true)
+            if (!secretMode) output.speak("تم تشغيل الرد التلقائي للكلوز")
+            return
+        }
+
+        if (lower == "auto close replies off" || lower == "اقفل الرد التلقائي للكلوز") {
+            closeChats.setAutoReply(false)
+            if (!secretMode) output.speak("تم إيقاف الرد التلقائي للكلوز")
+            return
+        }
+
+        if (lower == "reply in my style" || lower == "رد بأسلوبي") {
+            val pkg = JarvisAccessibilityService.currentPackage()
+            val chat = JarvisAccessibilityService.currentChatKey()
+            if (!closeChats.isClose(pkg, chat)) {
+                if (!secretMode) output.speak("الشات ده مش مضاف للكلوز")
+                return
+            }
+
+            val conversation = JarvisAccessibilityService.readRecentConversation()
+            val generated = replyGenerator.generate(conversation, styleProfile.getSamples())
+            sendReply(generated)
             return
         }
 
