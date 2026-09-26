@@ -41,7 +41,7 @@ class SpeakerVerifier(context: Context) {
 
     fun verifyOwner(): Boolean {
         if (!hasRecordPermission()) return false
-        val reference = decode(prefs.getString("signature", null) ?: return null) ?: return false
+        val reference = decode(prefs.getString("signature", null) ?: return false) ?: return false
         val sample = captureFeatures(verificationMs) ?: return false
         return cosine(reference, sample) >= 0.90f
     }
