@@ -12,6 +12,7 @@ import com.ichigoadam.jarvis.voice.OwnerVoiceGate
 import com.ichigoadam.jarvis.voice.VoiceInput
 import com.ichigoadam.jarvis.voice.VoiceOutput
 import com.ichigoadam.jarvis.voice.VoiceProfileManager
+import com.ichigoadam.jarvis.voice.SpeakerVerifier
 import com.ichigoadam.jarvis.voice.WakeWordDetector
 
 class JarvisController(context: Context) {
@@ -21,6 +22,7 @@ class JarvisController(context: Context) {
     private val wakeWord = WakeWordDetector()
     private val output = VoiceOutput(context)
     private val profiles = VoiceProfileManager(context)
+    private val speakerVerifier = SpeakerVerifier(context)
     private val ownerGate = OwnerVoiceGate()
     private val closeChats = CloseChatManager(context)
     private val styleProfile = StyleProfile(context)
@@ -60,7 +62,19 @@ class JarvisController(context: Context) {
         when (router.policyFor(command)) {
             CommandPolicy.OWNER_ONLY,
             CommandPolicy.SECRET_OWNER_ONLY -> {
-                if (!ownerGate.authorize(false)) return
+                if (!ownerGate.isEnrolled()) {
+                    if (!secretMode) output.speak("سجل بصمة صوت المالك أولاً من إعدادات جارفيس")
+                    return
+                }
+
+                // Stop the speech recognizer before the local speaker sample is captured.
+                input.stopListening()
+                val verified = speakerVerifier.verifyOwner()
+                if (!verified) {
+                    if (!secretMode) output.speak("لم يتم التحقق من صوت المالك")
+                    scheduleNextListen()
+                    return
+                }
             }
             CommandPolicy.PUBLIC -> Unit
         }
@@ -296,6 +310,15 @@ class JarvisController(context: Context) {
         if (listening) return
         listening = true
         input.startListening()
+    }
+
+    fun enrollOwnerVoice(): Boolean {
+        val ok = speakerVerifier.enrollOwner()
+        if (ok) {
+            profiles.enrollOwner()
+            ownerGate.setEnrolled(true)
+        }
+        return ok
     }
 
     private fun scheduleNextListen() {
