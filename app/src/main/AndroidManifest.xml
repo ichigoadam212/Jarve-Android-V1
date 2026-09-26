@@ -31,6 +31,12 @@
             android:foregroundServiceType="microphone" />
 
         <service
+            android:name=".friday.FridayFallbackService"
+            android:exported="false"
+            android:process=":friday"
+            android:foregroundServiceType="microphone" />
+
+        <service
             android:name=".integration.JarvisTileService"
             android:label="JARVIS"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
