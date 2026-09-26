@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import com.ichigoadam.jarvis.core.JarvisController
+import com.ichigoadam.jarvis.friday.FridayFallbackService
 
 class JarvisService : Service() {
     companion object {
@@ -17,6 +18,7 @@ class JarvisService : Service() {
         private const val KEY_RUNNING = "running"
 
         fun start(context: Context) {
+            FridayFallbackService.stop(context)
             context.startForegroundService(Intent(context, JarvisService::class.java))
         }
 
