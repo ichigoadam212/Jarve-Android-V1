@@ -16,7 +16,9 @@ class FridayModule(private val context: Context) {
 
         return when {
             normalized == "friday status" ||
-            normalized == "حالة فرايداي" -> {
+            normalized == "status" ||
+            normalized == "حالة فرايداي" ||
+            normalized == "الحالة" -> {
                 val health = JarvisHealthReader.read(context)
                 FridayResult(
                     handled = true,
@@ -32,7 +34,9 @@ class FridayModule(private val context: Context) {
             }
 
             normalized == "friday analyze" ||
-            normalized == "حلل باستخدام فرايداي" -> {
+            normalized == "analyze" ||
+            normalized == "حلل باستخدام فرايداي" ||
+            normalized == "حلل" -> {
                 FridayResult(
                     handled = true,
                     response = "تم تمرير الطلب إلى طبقة التحليل الداخلية"
