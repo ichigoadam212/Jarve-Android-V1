@@ -2,6 +2,7 @@ package com.ichigoadam.jarvis.voice
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -14,7 +15,15 @@ class VoiceInput(
     private val onSessionFinished: () -> Unit = {}
 ) {
     private val appContext = context.applicationContext
-    private val recognizer = SpeechRecognizer.createSpeechRecognizer(appContext)
+
+    private val recognizer: SpeechRecognizer =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+        ) {
+            SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
+        } else {
+            SpeechRecognizer.createSpeechRecognizer(appContext)
+        }
 
     init {
         recognizer.setRecognitionListener(object : RecognitionListener {
@@ -49,20 +58,21 @@ class VoiceInput(
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
-            // Ask the installed recognizer to prefer a local/offline model.
-            // Android may ignore this when an offline model is unavailable.
             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
         recognizer.startListening(intent)
     }
 
-    fun isOfflineRecognitionAvailable(): Boolean {
-        return try {
+    fun isOnDevice(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+
+    fun isRecognitionAvailable(): Boolean =
+        try {
             SpeechRecognizer.isRecognitionAvailable(appContext)
         } catch (_: Exception) {
             false
         }
-    }
 
     fun stopListening() {
         recognizer.stopListening()
