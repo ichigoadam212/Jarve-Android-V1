@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.os.Handler
 import android.os.Looper
 import com.ichigoadam.jarvis.JarvisService
+import com.ichigoadam.jarvis.friday.FridayFallbackService
 
 class GuardianService : Service() {
     companion object {
@@ -18,10 +19,18 @@ class GuardianService : Service() {
 
     private lateinit var guardian: Guardian
     private val handler = Handler(Looper.getMainLooper())
+    private var jarvisWasSeenRunning = false
     private val monitor = object : Runnable {
         override fun run() {
-            if (!JarvisService.isRunning(applicationContext)) {
-                guardian.shouldRestart()
+            val running = JarvisService.isRunning(applicationContext)
+
+            if (running) {
+                jarvisWasSeenRunning = true
+                FridayFallbackService.stop(applicationContext)
+                guardian.resetFailures()
+            } else if (jarvisWasSeenRunning) {
+                // JARVIS was running before and is now gone: enter isolated F.R.I.D.A.Y. fallback.
+                FridayFallbackService.start(applicationContext)
             }
             handler.postDelayed(this, 10_000L)
         }
