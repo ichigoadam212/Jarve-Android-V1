@@ -16,15 +16,24 @@ class JarvisService : Service() {
         private const val NOTIFICATION_ID = 1001
         private const val PREFS = "jarvis_state"
         private const val KEY_RUNNING = "running"
+        private const val KEY_INTENTIONAL_STOP = "intentional_stop"
 
         fun start(context: Context) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit().putBoolean(KEY_INTENTIONAL_STOP, false).apply()
             FridayFallbackService.stop(context)
             context.startForegroundService(Intent(context, JarvisService::class.java))
         }
 
         fun stop(context: Context) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit().putBoolean(KEY_INTENTIONAL_STOP, true).apply()
             context.stopService(Intent(context, JarvisService::class.java))
         }
+
+        fun wasIntentionalStop(context: Context): Boolean =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getBoolean(KEY_INTENTIONAL_STOP, false)
 
         fun isRunning(context: Context): Boolean =
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
