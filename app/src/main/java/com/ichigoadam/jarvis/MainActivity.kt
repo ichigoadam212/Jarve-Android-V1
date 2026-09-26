@@ -124,6 +124,27 @@ class MainActivity : Activity() {
         }
         content.addView(listen, lp(-1, 54, top = 10))
 
+        val enrollVoice = actionButton("ENROLL OWNER VOICE")
+        enrollVoice.setOnClickListener {
+            if (!hasAudioPermission()) {
+                requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
+            } else {
+                status.text = "JARVIS Android V1\nSpeak naturally for about 3 seconds..."
+                Thread {
+                    val ok = controller?.enrollOwnerVoice() == true
+                    runOnUiThread {
+                        if (ok) {
+                            coreState.text = "●  OWNER VOICE READY"
+                            status.text = "JARVIS Android V1\nOwner voice profile stored locally"
+                        } else {
+                            status.text = "JARVIS Android V1\nVoice enrollment failed"
+                        }
+                    }
+                }.start()
+            }
+        }
+        content.addView(enrollVoice, lp(-1, 54, top = 10))
+
         val accessibility = actionButton("ENABLE APP CONTROL")
         accessibility.setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
