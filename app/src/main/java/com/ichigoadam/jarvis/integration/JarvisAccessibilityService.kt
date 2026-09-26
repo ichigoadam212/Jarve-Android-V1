@@ -3,8 +3,11 @@ package com.ichigoadam.jarvis.integration
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import com.ichigoadam.jarvis.memory.AutoReplyCoordinator
 
 class JarvisAccessibilityService : AccessibilityService() {
 
@@ -20,9 +23,8 @@ class JarvisAccessibilityService : AccessibilityService() {
 
         fun isConnected(): Boolean = instance != null
 
-        fun currentPackage(): String {
-            return instance?.rootInActiveWindow?.packageName?.toString().orEmpty()
-        }
+        fun currentPackage(): String =
+            instance?.rootInActiveWindow?.packageName?.toString().orEmpty()
 
         fun currentChatKey(): String {
             val service = instance ?: return ""
@@ -31,12 +33,27 @@ class JarvisAccessibilityService : AccessibilityService() {
 
             val lines = mutableListOf<String>()
             service.collectText(root, lines)
+
             val ignored = setOf(
                 "WhatsApp", "Instagram", "Facebook",
-                "إرسال", "ارسال", "send", "send message"
+                "إرسال", "ارسال", "send", "send message",
+                "بحث", "search", "back", "رجوع"
             )
+
             return lines.map { it.trim() }
-                .firstOrNull { it.length in 2..60 && it !in ignored }
+                .filter { it.length in 2..60 }
+                .filter { it !in ignored }
+                .filterNot { it.all { c -> c.isDigit() || c.isWhitespace() || c in ":/.-" } }
+                .filterNot { it.matches(Regex("\d{1,2}:\d{2}")) }
+                .distinct()
+                .take(12)
+                .maxByOrNull { candidate ->
+                    var score = 0
+                    if (!candidate.contains("؟") && !candidate.contains("?")) score += 1
+                    if (candidate.split("\s+".toRegex()).size in 1..5) score += 2
+                    if (candidate.length in 3..30) score += 2
+                    score
+                }
                 .orEmpty()
         }
 
@@ -71,26 +88,27 @@ class JarvisAccessibilityService : AccessibilityService() {
             if (!supportedPackages.contains(root.packageName?.toString())) return ""
 
             val collected = linkedSetOf<String>()
-            repeat(maxPages.coerceIn(1, 25)) {
+            val pages = maxPages.coerceIn(1, 25)
+
+            repeat(pages) {
+                val current = service.rootInActiveWindow ?: return@repeat
                 val page = mutableListOf<String>()
-                service.collectText(root, page)
+                service.collectText(current, page)
                 page.map { it.trim() }
                     .filter { it.length in 2..500 }
                     .forEach { collected.add(it) }
 
                 val scrollable = mutableListOf<AccessibilityNodeInfo>()
-                service.collectScrollable(root, scrollable)
+                service.collectScrollable(current, scrollable)
                 val target = scrollable.firstOrNull { it.isVisibleToUser }
                 if (target == null ||
                     !target.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)
                 ) {
                     return@repeat
                 }
-
             }
 
-            // Return the conversation to approximately its original area.
-            repeat(maxPages.coerceIn(1, 60)) {
+            repeat(pages) {
                 val current = service.rootInActiveWindow ?: return@repeat
                 val scrollable = mutableListOf<AccessibilityNodeInfo>()
                 service.collectScrollable(current, scrollable)
@@ -118,6 +136,15 @@ class JarvisAccessibilityService : AccessibilityService() {
                 .distinct()
 
             return cleaned.takeLast(20).joinToString("\n").take(3000)
+        }
+
+        fun readLastVisibleMessage(): String {
+            return readRecentConversation()
+                .lineSequence()
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+                .lastOrNull()
+                .orEmpty()
         }
 
         fun replyToFocusedInput(message: String): Boolean {
@@ -163,13 +190,39 @@ class JarvisAccessibilityService : AccessibilityService() {
         }
     }
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val autoReply = AutoReplyCoordinator(this)
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Content is accessed only after an explicit Jarvis command.
+        val eventPackage = event?.packageName?.toString() ?: return
+        if (!supportedPackages.contains(eventPackage)) return
+
+        when (event.eventType) {
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+            AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED,
+            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                // Debounced and bounded: auto-reply is only considered for Close chats.
+                mainHandler.removeCallbacks(autoReplyCheck)
+                mainHandler.postDelayed(autoReplyCheck, 700L)
+            }
+        }
+    }
+
+    private val autoReplyCheck = Runnable {
+        val pkg = currentPackage()
+        val chat = currentChatKey()
+        val conversation = readRecentConversation()
+        autoReply.onConversationChanged(
+            packageName = pkg,
+            chatKey = chat,
+            conversation = conversation,
+            send = { message -> replyToFocusedInput(message) }
+        )
     }
 
     private fun findEditable(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
@@ -247,6 +300,7 @@ class JarvisAccessibilityService : AccessibilityService() {
     override fun onInterrupt() = Unit
 
     override fun onDestroy() {
+        mainHandler.removeCallbacksAndMessages(null)
         if (instance === this) instance = null
         super.onDestroy()
     }
