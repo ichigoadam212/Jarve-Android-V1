@@ -22,19 +22,11 @@ class CloseChatManager(context: Context) {
     fun isAutoReplyEnabled(): Boolean =
         prefs.getBoolean("auto_reply", false)
 
-    fun setAutoReply(enabled: Boolean) {
-        prefs.edit().putBoolean("auto_reply", enabled).apply()
-    }
-
-    fun isAutoReplyEnabled(): Boolean =
-        prefs.getBoolean("auto_reply", false)
-
     fun isClose(packageName: String, chatKey: String): Boolean {
         return packageName.isNotBlank() && chatKey.isNotBlank() &&
             prefs.getBoolean(key(packageName, chatKey), false)
     }
 
-    private fun key(packageName: String, chatKey: String): String {
-        return "chat_" + packageName + "_" + chatKey.hashCode()
-    }
+    private fun key(packageName: String, chatKey: String): String =
+        "chat_" + packageName + "_" + chatKey.hashCode()
 }
