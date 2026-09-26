@@ -16,6 +16,7 @@ import com.ichigoadam.jarvis.voice.WakeWordDetector
 
 class JarvisController(context: Context) {
     private val engine = CommandEngine()
+    private val intelligence = JarvisIntelligence(context.applicationContext)
     private val router = CommandRouter()
     private val wakeWord = WakeWordDetector()
     private val output = VoiceOutput(context)
@@ -223,6 +224,14 @@ class JarvisController(context: Context) {
                 if (!secretMode) output.speak("تم الإيقاف")
                 return
             }
+        }
+
+        val intelligenceResult = intelligence.process(command)
+        if (intelligenceResult.handled) {
+            if (!secretMode && intelligenceResult.response.isNotBlank()) {
+                output.speak(intelligenceResult.response)
+            }
+            return
         }
 
         val result = engine.execute(command)
