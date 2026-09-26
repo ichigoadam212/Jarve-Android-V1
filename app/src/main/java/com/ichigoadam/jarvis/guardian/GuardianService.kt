@@ -28,9 +28,14 @@ class GuardianService : Service() {
                 jarvisWasSeenRunning = true
                 FridayFallbackService.stop(applicationContext)
                 guardian.resetFailures()
-            } else if (jarvisWasSeenRunning) {
-                // JARVIS was running before and is now gone: enter isolated F.R.I.D.A.Y. fallback.
-                FridayFallbackService.start(applicationContext)
+            } else if (jarvisWasSeenRunning &&
+                !JarvisService.wasIntentionalStop(applicationContext)
+            ) {
+                // Try a bounded restart first. If repeated restarts fail, hand over
+                // to the isolated F.R.I.D.A.Y. process.
+                if (!guardian.shouldRestart()) {
+                    FridayFallbackService.start(applicationContext)
+                }
             }
             handler.postDelayed(this, 10_000L)
         }
