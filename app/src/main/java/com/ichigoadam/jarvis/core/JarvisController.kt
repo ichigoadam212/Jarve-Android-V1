@@ -15,7 +15,7 @@ import com.ichigoadam.jarvis.voice.VoiceProfileManager
 import com.ichigoadam.jarvis.voice.SpeakerVerifier
 import com.ichigoadam.jarvis.voice.WakeWordDetector
 
-class JarvisController(context: Context) {
+class JarvisController(private val context: Context) {
     private val engine = CommandEngine()
     private val intelligence = JarvisIntelligence(context.applicationContext)
     private val router = CommandRouter()
