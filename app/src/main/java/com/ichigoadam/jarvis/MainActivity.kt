@@ -116,10 +116,12 @@ class MainActivity : Activity() {
         listen.setOnClickListener {
             if (!hasAudioPermission()) {
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
-            } else {
-                controller?.listen()
+            } else if (controller?.listen() == true) {
                 coreState.text = "●  LISTENING"
                 status.text = "JARVIS Android V1\nListening..."
+            } else {
+                coreState.text = "●  CORE READY"
+                status.text = "JARVIS Android V1\nSpeech recognition unavailable. Check Google speech services and microphone permission."
             }
         }
         content.addView(listen, lp(-1, 54, top = 10))
