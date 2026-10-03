@@ -16,17 +16,22 @@ class VoiceInput(
 ) {
     private val appContext = context.applicationContext
 
-    private val recognizer: SpeechRecognizer =
+    private val recognizer: SpeechRecognizer? = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
         ) {
             SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
-        } else {
+        } else if (SpeechRecognizer.isRecognitionAvailable(appContext)) {
             SpeechRecognizer.createSpeechRecognizer(appContext)
+        } else {
+            null
         }
+    } catch (_: Exception) {
+        null
+    }
 
     init {
-        recognizer.setRecognitionListener(object : RecognitionListener {
+        recognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onResults(results: Bundle?) {
                 results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     ?.firstOrNull()
@@ -50,7 +55,8 @@ class VoiceInput(
         })
     }
 
-    fun startListening(language: String = "ar-EG") {
+    fun startListening(language: String = "ar-EG"): Boolean {
+        val activeRecognizer = recognizer ?: return false
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
             putExtra(
@@ -60,7 +66,12 @@ class VoiceInput(
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
-        recognizer.startListening(intent)
+        return try {
+            activeRecognizer.startListening(intent)
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 
     fun isOnDevice(): Boolean =
@@ -75,10 +86,10 @@ class VoiceInput(
         }
 
     fun stopListening() {
-        recognizer.stopListening()
+        try { recognizer?.stopListening() } catch (_: Exception) { }
     }
 
     fun destroy() {
-        recognizer.destroy()
+        try { recognizer?.destroy() } catch (_: Exception) { }
     }
 }
