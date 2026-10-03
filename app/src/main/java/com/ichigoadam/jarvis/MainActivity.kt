@@ -38,7 +38,7 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(28.dp(), 34.dp(), 28.dp(), 34.dp())
-            setBackgroundColor(background)
+            setBackgroundColor(this@MainActivity.background)
         }
 
         val scroll = ScrollView(this).apply {
