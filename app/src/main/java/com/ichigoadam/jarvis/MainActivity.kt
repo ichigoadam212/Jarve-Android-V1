@@ -72,7 +72,7 @@ class MainActivity : Activity() {
             textSize = 22f
             setTextColor(textPrimary)
             gravity = Gravity.CENTER
-            background = circleDrawable(accent)
+            setBackground(circleDrawable(accent))
             elevation = 10f
         }
         content.addView(core, lp(190, 190))
@@ -93,7 +93,7 @@ class MainActivity : Activity() {
             setTextColor(textSecondary)
             gravity = Gravity.CENTER
             setPadding(12.dp(), 16.dp(), 12.dp(), 16.dp())
-            background = rounded(panel, 18f)
+            setBackground(rounded(panel, 18f))
         }
         content.addView(status, lp(-1, -2, top = 14))
 
@@ -181,7 +181,7 @@ class MainActivity : Activity() {
             setTextColor(textPrimary)
             gravity = Gravity.CENTER
             isAllCaps = false
-            background = rounded(panel, 16f)
+            setBackground(rounded(panel, 16f))
             stateListAnimator = null
         }
 
