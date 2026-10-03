@@ -44,13 +44,13 @@ class JarvisAccessibilityService : AccessibilityService() {
                 .filter { it.length in 2..60 }
                 .filter { it !in ignored }
                 .filterNot { it.all { c -> c.isDigit() || c.isWhitespace() || c in ":/.-" } }
-                .filterNot { it.matches(Regex("\d{1,2}:\d{2}")) }
+                .filterNot { it.matches(Regex("\\d{1,2}:\\d{2}")) }
                 .distinct()
                 .take(12)
                 .maxByOrNull { candidate ->
                     var score = 0
                     if (!candidate.contains("؟") && !candidate.contains("?")) score += 1
-                    if (candidate.split("\s+".toRegex()).size in 1..5) score += 2
+                    if (candidate.split("\\s+".toRegex()).size in 1..5) score += 2
                     if (candidate.length in 3..30) score += 2
                     score
                 }
