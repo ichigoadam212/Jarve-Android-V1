@@ -306,10 +306,11 @@ class JarvisController(private val context: Context) {
         }
     }
 
-    fun listen() {
-        if (listening) return
-        listening = true
-        input.startListening()
+    fun listen(): Boolean {
+        if (listening) return true
+        val started = input.startListening()
+        listening = started
+        return started
     }
 
     fun enrollOwnerVoice(): Boolean {
@@ -325,10 +326,8 @@ class JarvisController(private val context: Context) {
         if (!listening) return
         mainHandler.postDelayed({
             if (listening) {
-                try {
-                    input.startListening()
-                } catch (_: Exception) {
-                    scheduleNextListen()
+                if (!input.startListening()) {
+                    listening = false
                 }
             }
         }, 350)
