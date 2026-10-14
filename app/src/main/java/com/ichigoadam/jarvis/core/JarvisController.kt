@@ -352,8 +352,12 @@ class JarvisController(private val context: Context) {
                 return@postDelayed
             }
             if (!input.startListening()) {
-                // A transient recognizer-busy error should not permanently disable voice input.
-                mainHandler.postDelayed({ scheduleNextListen() }, 700)
+                // Retry only when Android still reports an available recognizer.
+                if (input.canListen() && input.isRecognitionAvailable()) {
+                    mainHandler.postDelayed({ scheduleNextListen() }, 700)
+                } else {
+                    listening = false
+                }
             }
         }, 350)
     }
