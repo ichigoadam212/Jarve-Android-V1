@@ -52,7 +52,7 @@ class FridayActivity : Activity() {
         root.addView(heading, lp(-1, -2))
 
         val subtitle = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "INDEPENDENT ASSISTANT  •  FALLBACK READY", "مساعدة مستقلة • جاهزة للعمل الاحتياطي")
+            text = AssistantLanguage.ui(this@FridayActivity, "INDEPENDENT ASSISTANT  •  FALLBACK READY", "مساعدة مستقلة • جاهزة للعمل الاحتياطي")
             textSize = 10f
             letterSpacing = 0.06f
             gravity = Gravity.CENTER
@@ -78,7 +78,7 @@ class FridayActivity : Activity() {
         root.addView(core, lp(176, 176))
 
         state = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "●  STANDBY", "● في وضع الاستعداد")
+            text = AssistantLanguage.ui(this@FridayActivity, "●  STANDBY", "● في وضع الاستعداد")
             textSize = 13f
             gravity = Gravity.CENTER
             setTextColor(accent)
@@ -86,7 +86,7 @@ class FridayActivity : Activity() {
         root.addView(state, lp(-1, -2, 22))
 
         status = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "FRIDAY is ready. Start it to take over the microphone from JARVIS.", "أنا فرايداي، جاهزة. فعّليني لاستلام الميكروفون من جارفيس.")
+            text = AssistantLanguage.ui(this@FridayActivity, "FRIDAY is ready. Start it to take over the microphone from JARVIS.", "أنا فرايداي، جاهزة. فعّليني لاستلام الميكروفون من جارفيس.")
             textSize = 13f
             gravity = Gravity.CENTER
             setTextColor(secondary)
@@ -117,8 +117,8 @@ class FridayActivity : Activity() {
             // Mark JARVIS stop as intentional so Guardian does not restart it over FRIDAY.
             JarvisService.stop(this)
             FridayFallbackService.start(this)
-            state.text = AssistantLanguage.ui(this, "●  FRIDAY ACTIVE", "● فرايداي نشطة")
-            status.text = AssistantLanguage.ui(this, "FRIDAY is active in its own process. Only FRIDAY should hold the microphone.", "فرايداي نشطة في عملية مستقلة. المفروض فرايداي وحدها تستخدم الميكروفون.")
+            state.text = AssistantLanguage.ui(this@FridayActivity, "●  FRIDAY ACTIVE", "● فرايداي نشطة")
+            status.text = AssistantLanguage.ui(this@FridayActivity, "FRIDAY is active in its own process. Only FRIDAY should hold the microphone.", "فرايداي نشطة في عملية مستقلة. المفروض فرايداي وحدها تستخدم الميكروفون.")
         }
         root.addView(start, lp(-1, 54, 16))
 
@@ -126,16 +126,16 @@ class FridayActivity : Activity() {
         resume.setOnClickListener {
             JarvisService.start(this)
             startForegroundService(Intent(this, GuardianService::class.java))
-            state.text = AssistantLanguage.ui(this, "●  JARVIS RESUMING", "● جارفيس يستعيد التحكم")
-            status.text = AssistantLanguage.ui(this, "JARVIS is being started. FRIDAY will stop as JARVIS takes control.", "جاري تشغيل جارفيس. ستتوقف فرايداي عندما يستعيد التحكم.")
+            state.text = AssistantLanguage.ui(this@FridayActivity, "●  JARVIS RESUMING", "● جارفيس يستعيد التحكم")
+            status.text = AssistantLanguage.ui(this@FridayActivity, "JARVIS is being started. FRIDAY will stop as JARVIS takes control.", "جاري تشغيل جارفيس. ستتوقف فرايداي عندما يستعيد التحكم.")
         }
         root.addView(resume, lp(-1, 54, 10))
 
         val stop = actionButton("STOP FRIDAY")
         stop.setOnClickListener {
             FridayFallbackService.stop(this)
-            state.text = AssistantLanguage.ui(this, "●  STANDBY", "● في وضع الاستعداد")
-            status.text = AssistantLanguage.ui(this, "FRIDAY stopped. Select JARVIS to resume the primary assistant.", "تم إيقاف فرايداي. اختار جارفيس لاستئناف المساعد الأساسي.")
+            state.text = AssistantLanguage.ui(this@FridayActivity, "●  STANDBY", "● في وضع الاستعداد")
+            status.text = AssistantLanguage.ui(this@FridayActivity, "FRIDAY stopped. Select JARVIS to resume the primary assistant.", "تم إيقاف فرايداي. اختار جارفيس لاستئناف المساعد الأساسي.")
         }
         root.addView(stop, lp(-1, 54, 10))
 
