@@ -335,6 +335,7 @@ Both assistants include a small built-in learner's dictionary with Arabic meanin
 - `ترجم careful`
 - `قاموس future`
 - `meaning ability`
+- `translate gravity`
 - `define careful`
 - `what does future mean`
 
