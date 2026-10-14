@@ -35,6 +35,7 @@ class FridayFallbackService : Service() {
     private lateinit var input: VoiceInput
     private lateinit var output: VoiceOutput
     private val wakeWord = WakeWordDetector()
+    private lateinit var fridayModule: FridayModule
     private var listening = false
 
     override fun onCreate() {
@@ -58,6 +59,7 @@ class FridayFallbackService : Service() {
         startForeground(NOTIFICATION_ID, notification)
 
         output = VoiceOutput(this)
+        fridayModule = FridayModule(applicationContext)
         input = VoiceInput(
             context = this,
             onResult = { handleVoice(it) },
@@ -72,7 +74,7 @@ class FridayFallbackService : Service() {
         if (normalized.isBlank()) return
 
         if (wakeWord.isWakeWord(normalized)) {
-            output.speak("نعم، جارفيس في وضع الاستعداد")
+            output.speak("نعم، فرايداي جاهزة")
             return
         }
 
@@ -85,9 +87,17 @@ class FridayFallbackService : Service() {
             command == "start jarvis" ||
             command == "restart jarvis"
         ) {
-            output.speak("جاري تشغيل جارفيس")
+            output.speak("جاري إعادة التحكم إلى جارفيس")
             JarvisService.start(this)
             stopSelf()
+            return
+        }
+
+        val result = fridayModule.analyze(normalized)
+        if (result.handled && result.response.isNotBlank()) {
+            output.speak(result.response)
+        } else {
+            output.speak("أنا فرايداي. أستطيع فحص حالة النظام وتنفيذ أوامر فرايداي المتاحة. قل: حالة فرايداي، أو حلل.")
         }
     }
 
