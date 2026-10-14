@@ -91,12 +91,12 @@ object EnglishDictionary {
         "work" to Entry("عمل / يعمل", "activity involving effort to achieve something")
     )
 
-    fun lookup(input: String): String? {
+    fun lookup(input: String, arabicMode: Boolean = true): String? {
         val word = input.trim().lowercase(Locale.ROOT)
             .trim { !it.isLetterOrDigit() && it != '\'' && it != '-' }
         if (word.isBlank() || word.any { it.isWhitespace() }) return null
         val entry = words[word] ?: return null
-        return "$word: ${entry.arabic}. In English: ${entry.definition}."
+        return if (arabicMode) "$word معناها ${entry.arabic}." else "$word: ${entry.definition}."
     }
 
     fun supportedWords(): Int = words.size
