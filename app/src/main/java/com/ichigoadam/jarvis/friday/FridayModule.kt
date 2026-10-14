@@ -43,13 +43,18 @@ class FridayModule(private val context: Context) {
                 val health = JarvisHealthReader.read(context)
                 FridayResult(
                     handled = true,
-                    response = if (health.running) {
-                        if (health.appControlConnected)
-                            "فرايداي تعمل، وجارفيس متصل وخدمة التحكم في التطبيقات مفعلة"
-                        else
-                            "فرايداي تعمل، وجارفيس متصل لكن خدمة التحكم في التطبيقات غير مفعلة"
+                    response = if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context)) {
+                        if (health.running) {
+                            if (health.appControlConnected)
+                                "فرايداي تعمل، وجارفيس متصل وخدمة التحكم في التطبيقات مفعلة"
+                            else "فرايداي تعمل، وجارفيس متصل لكن خدمة التحكم في التطبيقات غير مفعلة"
+                        } else "فرايداي تعمل بشكل مستقل. جارفيس غير متصل حالياً، ويمكنني استلام الأوامر المدعومة."
                     } else {
-                        "فرايداي تعمل بشكل مستقل. جارفيس غير متصل حالياً، ويمكنني استلام الأوامر المدعومة."
+                        if (health.running) {
+                            if (health.appControlConnected)
+                                "FRIDAY is active. JARVIS is connected and app control is enabled."
+                            else "FRIDAY is active. JARVIS is connected, but app control is not enabled."
+                        } else "FRIDAY is running independently. JARVIS is not connected; I can handle supported commands."
                     }
                 )
             }
@@ -60,7 +65,7 @@ class FridayModule(private val context: Context) {
             normalized == "حلل" -> {
                 FridayResult(
                     handled = true,
-                    response = "تم تمرير الطلب إلى طبقة التحليل الداخلية"
+                    response = if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context)) "تم تمرير الطلب إلى طبقة التحليل الداخلية" else "The request was passed to the internal analysis layer."
                 )
             }
 
