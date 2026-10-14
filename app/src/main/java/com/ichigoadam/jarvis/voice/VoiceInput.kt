@@ -11,7 +11,7 @@ import android.speech.SpeechRecognizer
 class VoiceInput(
     context: Context,
     private val onResult: (String) -> Unit,
-    private val onError: (Int) -> Unit = {},
+    private val onRecognitionError: (Int) -> Unit = {},
     private val onSessionFinished: () -> Unit = {}
 ) {
     private val appContext = context.applicationContext
@@ -51,7 +51,7 @@ class VoiceInput(
 
             override fun onError(error: Int) {
                 try {
-                    onError.invoke(error)
+                    onRecognitionError(error)
                 } catch (_: Exception) {
                     // Keep recognition alive even if an error observer fails.
                 } finally {
