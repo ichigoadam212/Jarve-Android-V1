@@ -100,7 +100,6 @@ object AssistantLanguage {
             "MICROPHONE PERMISSIONS" to "أذونات الميكروفون",
             "BACK TO ASSISTANT SELECTOR" to "العودة لاختيار المساعد",
             "Speech recognition unavailable. Check Google speech services and microphone permission." to "التعرّف على الكلام غير متاح. تأكد من خدمات الكلام وإذن الميكروفون.",
-            "GUARDIAN  •  FRIDAY FALLBACK  •  ACCESSIBILITY\\nVoice profile and Close-chat memory are managed locally.\\nEnglish dictionary: say 'meaning <word>' or 'معنى <word>'." to "الحارس • فرايداي الاحتياطية • إمكانية الوصول\\nملف الصوت وذاكرة الكلوز محفوظان محلياً.\\nالقاموس: قول معنى ثم الكلمة بالإنجليزي.",
             "GUARDIAN  •  FRIDAY FALLBACK  •  ACCESSIBILITY\nVoice profile and Close-chat memory are managed locally.\nEnglish dictionary: say 'meaning <word>' or 'معنى <word>'." to "الحارس • فرايداي الاحتياطية • إمكانية الوصول\nملف الصوت وذاكرة الكلوز محفوظان محلياً.\nالقاموس: قول معنى ثم الكلمة بالإنجليزي."
         )
         if (isArabic(context)) return translations[text] ?: text
