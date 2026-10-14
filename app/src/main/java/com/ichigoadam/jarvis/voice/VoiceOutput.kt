@@ -17,7 +17,7 @@ class VoiceOutput(context: Context, private val preferFemaleVoice: Boolean = fal
             if (closed) return@synchronized
             initialized = status == TextToSpeech.SUCCESS
             if (initialized) {
-                configureVoice(if (preferFemaleVoice) AssistantLanguage.speechTag(appContext) else AssistantLanguage.speechTag(appContext))
+                configureVoice(AssistantLanguage.speechTag(appContext))
                 val pending = pendingText
                 pendingText = null
                 if (pending != null) speakInitialized(pending)
