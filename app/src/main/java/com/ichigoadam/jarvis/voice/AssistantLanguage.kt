@@ -57,7 +57,8 @@ object AssistantLanguage {
             "HAND CONTROL BACK TO JARVIS" to "إعادة التحكم إلى جارفيس",
             "STOP FRIDAY" to "إيقاف فرايداي",
             "MICROPHONE PERMISSIONS" to "أذونات الميكروفون",
-            "BACK TO ASSISTANT SELECTOR" to "العودة لاختيار المساعد"
+            "BACK TO ASSISTANT SELECTOR" to "العودة لاختيار المساعد",
+            "GUARDIAN  •  FRIDAY FALLBACK  •  ACCESSIBILITY\\nVoice profile and Close-chat memory are managed locally.\\nEnglish dictionary: say 'meaning <word>' or 'معنى <word>'." to "الحارس • فرايداي الاحتياطية • إمكانية الوصول\\nملف الصوت وذاكرة الكلوز محفوظان محلياً.\\nالقاموس: قول معنى ثم الكلمة بالإنجليزي."
         )
         if (isArabic(context)) return translations[text] ?: text
         return translations.entries.firstOrNull { it.value == text }?.key ?: text
