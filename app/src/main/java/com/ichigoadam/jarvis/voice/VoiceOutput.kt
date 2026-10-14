@@ -18,10 +18,11 @@ class VoiceOutput(context: Context, private val preferFemaleVoice: Boolean = fal
 
     fun speak(text: String) {
         if (text.isBlank()) return
-        val languageTag = if (text.any { it in '\u0600'..'\u06FF' }) "ar-EG" else "en-US"
+        val spokenText = AssistantLanguage.localizeSpeech(appContext, text)
+        val languageTag = if (spokenText.any { it in '\u0600'..'\u06FF' }) "ar-EG" else "en-US"
         synchronized(ttsLock) {
             if (initialized) configureVoice(languageTag)
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "assistant-${System.nanoTime()}")
+            tts.speak(spokenText, TextToSpeech.QUEUE_FLUSH, null, "assistant-\${System.nanoTime()}")
         }
     }
 
