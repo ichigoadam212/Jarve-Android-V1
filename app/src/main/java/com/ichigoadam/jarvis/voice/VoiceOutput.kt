@@ -60,6 +60,10 @@ class VoiceOutput(context: Context, private val preferFemaleVoice: Boolean = fal
         if (female != null) tts.voice = female
     }
 
+    fun isSpeaking(): Boolean = synchronized(ttsLock) {
+        initialized && !closed && tts.isSpeaking
+    }
+
     fun shutdown() {
         synchronized(ttsLock) {
             closed = true
