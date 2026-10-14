@@ -77,10 +77,10 @@ class VoiceInput(
         }
     }
 
-    fun startListening(language: String = "ar-EG"): Boolean {
+    fun startListening(language: String? = null): Boolean {
         val activeRecognizer = recognizer ?: return false
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, language ?: AssistantLanguage.speechTag(appContext))
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
@@ -99,6 +99,8 @@ class VoiceInput(
     fun isOnDevice(): Boolean =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
+
+    fun canListen(): Boolean = recognizer != null
 
     fun isRecognitionAvailable(): Boolean =
         try {

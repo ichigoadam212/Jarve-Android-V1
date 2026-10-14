@@ -81,6 +81,26 @@ class JarvisController(private val context: Context) {
 
         val lower = command.lowercase()
 
+        val dictionaryQuery = when {
+            lower.startsWith("معنى ") -> lower.substringAfter("معنى ").trim()
+            lower.startsWith("ترجم ") -> lower.substringAfter("ترجم ").trim()
+            lower.startsWith("قاموس ") -> lower.substringAfter("قاموس ").trim()
+            lower.startsWith("define ") -> lower.substringAfter("define ").trim()
+            lower.startsWith("dictionary ") -> lower.substringAfter("dictionary ").trim()
+            lower.startsWith("meaning ") -> lower.substringAfter("meaning ").trim()
+            lower.startsWith("what does ") && lower.endsWith(" mean") ->
+                lower.substringAfter("what does ").removeSuffix(" mean").trim()
+            lower.startsWith("translate ") -> lower.substringAfter("translate ").trim()
+            else -> ""
+        }
+        if (dictionaryQuery.isNotBlank()) {
+            val found = com.ichigoadam.jarvis.memory.EnglishDictionary.lookup(dictionaryQuery, com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
+            if (!secretMode) output.speak(found ?: if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
+                "مش لاقي الكلمة دي في القاموس المحلي حالياً."
+            else "I couldn't find that word in the offline dictionary yet.")
+            return
+        }
+
         if (lower == "status" || lower == "الحالة") {
             if (!secretMode) {
                 val running = JarvisHealthReader.read(context)
@@ -325,8 +345,17 @@ class JarvisController(private val context: Context) {
     private fun scheduleNextListen() {
         if (!listening) return
         mainHandler.postDelayed({
-            if (listening) {
-                if (!input.startListening()) {
+            if (!listening) return@postDelayed
+            // Avoid reopening the microphone while JARVIS is speaking.
+            if (output.isSpeaking()) {
+                scheduleNextListen()
+                return@postDelayed
+            }
+            if (!input.startListening()) {
+                // Retry only when Android still reports an available recognizer.
+                if (input.canListen() && input.isRecognitionAvailable()) {
+                    mainHandler.postDelayed({ scheduleNextListen() }, 700)
+                } else {
                     listening = false
                 }
             }

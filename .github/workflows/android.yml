@@ -2,8 +2,15 @@ name: Build JARVIS Android V1
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches: [ main ]
+    paths:
+      - 'app/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/android.yml'
+  push:
+    branches: [ main, 'feature/jarvis-friday-separated-ui' ]
     paths:
       - 'app/**'
       - '*.gradle.kts'
@@ -30,6 +37,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+
+      - name: Run unit tests
+        run: gradle --no-daemon testDebugUnitTest
 
       - name: Build debug APK
         run: gradle --no-daemon assembleDebug

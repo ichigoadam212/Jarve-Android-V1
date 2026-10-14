@@ -316,3 +316,27 @@ License
 This project is currently under development.
 
 License and distribution terms will be defined in a future release.
+
+---
+
+Arabic / English Language Support
+
+JARVIS and FRIDAY share a saved Arabic/English preference. Arabic is the initial default, and either assistant screen can switch languages. Speech recognition follows the selected language when the installed Android speech service supports it.
+
+FRIDAY Voice
+
+FRIDAY uses feminine Arabic wording and asks Android Text-to-Speech for an installed female voice when one is available. The exact voice and accent depend on the voices installed on the device; this project does not bundle a movie audio recording.
+
+Offline English Dictionary
+
+Both assistants include a small built-in learner's dictionary with Arabic meanings and simple English definitions. Supported voice command patterns include:
+
+- `معنى ability`
+- `ترجم careful`
+- `قاموس future`
+- `meaning ability`
+- `translate gravity`
+- `define careful`
+- `what does future mean`
+
+The dictionary is local and does not need an internet connection. It currently covers a starter set of common words, not every English word. Speech recognition and spoken output still depend on the device's installed language data and speech services.

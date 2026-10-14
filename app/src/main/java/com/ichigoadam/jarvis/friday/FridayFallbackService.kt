@@ -35,6 +35,7 @@ class FridayFallbackService : Service() {
     private lateinit var input: VoiceInput
     private lateinit var output: VoiceOutput
     private val wakeWord = WakeWordDetector()
+    private lateinit var fridayModule: FridayModule
     private var listening = false
 
     override fun onCreate() {
@@ -57,7 +58,8 @@ class FridayFallbackService : Service() {
 
         startForeground(NOTIFICATION_ID, notification)
 
-        output = VoiceOutput(this)
+        output = VoiceOutput(this, preferFemaleVoice = true)
+        fridayModule = FridayModule(applicationContext)
         input = VoiceInput(
             context = this,
             onResult = { handleVoice(it) },
@@ -72,7 +74,7 @@ class FridayFallbackService : Service() {
         if (normalized.isBlank()) return
 
         if (wakeWord.isWakeWord(normalized)) {
-            output.speak("نعم، جارفيس في وضع الاستعداد")
+            output.speak(if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(this)) "نعم، فرايداي جاهزة" else "Yes, FRIDAY is ready.")
             return
         }
 
@@ -85,9 +87,17 @@ class FridayFallbackService : Service() {
             command == "start jarvis" ||
             command == "restart jarvis"
         ) {
-            output.speak("جاري تشغيل جارفيس")
+            output.speak(if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(this)) "جاري إعادة التحكم إلى جارفيس" else "Handing control back to JARVIS.")
             JarvisService.start(this)
             stopSelf()
+            return
+        }
+
+        val result = fridayModule.analyze(normalized)
+        if (result.handled && result.response.isNotBlank()) {
+            output.speak(result.response)
+        } else {
+            output.speak(if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(this)) "أنا فرايداي، جاهزة لمساعدتك. أقدر أفحص حالة النظام. قولي: حالة فرايداي، أو حللي." else "I am FRIDAY, ready to help. I can check system status. Say: FRIDAY status, or analyze.")
         }
     }
 
@@ -95,21 +105,32 @@ class FridayFallbackService : Service() {
         if (listening) return
         listening = true
         try {
-            input.startListening()
+            if (!input.startListening()) {
+                if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+                else listening = false
+            }
         } catch (_: Exception) {
-            scheduleListen()
+            if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+            else listening = false
         }
     }
 
     private fun scheduleListen() {
         if (!listening) return
         android.os.Handler(mainLooper).postDelayed({
-            if (listening && !JarvisService.isRunning(this)) {
-                try {
-                    input.startListening()
-                } catch (_: Exception) {
-                    scheduleListen()
+            if (!listening || JarvisService.isRunning(this)) return@postDelayed
+            if (output.isSpeaking()) {
+                scheduleListen()
+                return@postDelayed
+            }
+            try {
+                if (!input.startListening()) {
+                    if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+                    else listening = false
                 }
+            } catch (_: Exception) {
+                if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+                else listening = false
             }
         }, 500)
     }
