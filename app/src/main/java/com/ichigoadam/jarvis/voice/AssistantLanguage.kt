@@ -59,10 +59,17 @@ object AssistantLanguage {
         )
         exact[text]?.let { return it }
         return when {
-            text.startsWith("تم فتح ") -> "Opened " + text.removePrefix("تم فتح ")
-            text.startsWith("لم أستطع فتح ") -> "I could not open " + text.removePrefix("لم أستطع فتح ")
+            text.startsWith("تم فتح ") -> "Opened " + englishAppName(text.removePrefix("تم فتح "))
+            text.startsWith("لم أستطع فتح ") -> "I could not open " + englishAppName(text.removePrefix("لم أستطع فتح "))
             else -> text
         }
+    }
+
+    private fun englishAppName(name: String): String = when (name.trim()) {
+        "واتساب" -> "WhatsApp"
+        "انستجرام", "إنستجرام" -> "Instagram"
+        "فيسبوك" -> "Facebook"
+        else -> name
     }
 
     fun ui(context: Context, english: String, arabic: String): String =
