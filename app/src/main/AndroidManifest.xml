@@ -21,6 +21,10 @@
         android:supportsRtl="true">
 
         <activity
+            android:name=".friday.FridayActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
