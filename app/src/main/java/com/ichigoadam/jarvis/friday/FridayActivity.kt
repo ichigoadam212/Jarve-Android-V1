@@ -134,7 +134,7 @@ class FridayActivity : Activity() {
         val stop = actionButton("STOP FRIDAY")
         stop.setOnClickListener {
             FridayFallbackService.stop(this)
-            state.text = "●  STANDBY"
+            state.text = AssistantLanguage.ui(this, "●  STANDBY", "● في وضع الاستعداد")
             status.text = AssistantLanguage.ui(this, "FRIDAY stopped. Select JARVIS to resume the primary assistant.", "تم إيقاف فرايداي. اختار جارفيس لاستئناف المساعد الأساسي.")
         }
         root.addView(stop, lp(-1, 54, 10))
