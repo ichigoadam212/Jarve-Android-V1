@@ -105,7 +105,7 @@ class FridayFallbackService : Service() {
         if (listening) return
         listening = true
         try {
-            input.startListening()
+            if (!input.startListening()) scheduleListen()
         } catch (_: Exception) {
             scheduleListen()
         }
@@ -114,12 +114,15 @@ class FridayFallbackService : Service() {
     private fun scheduleListen() {
         if (!listening) return
         android.os.Handler(mainLooper).postDelayed({
-            if (listening && !JarvisService.isRunning(this)) {
-                try {
-                    input.startListening()
-                } catch (_: Exception) {
-                    scheduleListen()
-                }
+            if (!listening || JarvisService.isRunning(this)) return@postDelayed
+            if (output.isSpeaking()) {
+                scheduleListen()
+                return@postDelayed
+            }
+            try {
+                if (!input.startListening()) scheduleListen()
+            } catch (_: Exception) {
+                scheduleListen()
             }
         }, 500)
     }
