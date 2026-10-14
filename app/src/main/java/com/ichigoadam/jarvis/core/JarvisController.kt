@@ -345,10 +345,15 @@ class JarvisController(private val context: Context) {
     private fun scheduleNextListen() {
         if (!listening) return
         mainHandler.postDelayed({
-            if (listening) {
-                if (!input.startListening()) {
-                    listening = false
-                }
+            if (!listening) return@postDelayed
+            // Avoid reopening the microphone while JARVIS is speaking.
+            if (output.isSpeaking()) {
+                scheduleNextListen()
+                return@postDelayed
+            }
+            if (!input.startListening()) {
+                // A transient recognizer-busy error should not permanently disable voice input.
+                mainHandler.postDelayed({ scheduleNextListen() }, 700)
             }
         }, 350)
     }
