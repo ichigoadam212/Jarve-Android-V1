@@ -228,8 +228,11 @@ class MainActivity : Activity() {
         content.addView(Space(this), lp(1, 22))
 
         val info = TextView(this).apply {
-            text = "GUARDIAN  •  FRIDAY FALLBACK  •  ACCESSIBILITY\n" +
-                "Voice profile and Close-chat memory are managed locally."
+            text = AssistantLanguage.ui(
+                this,
+                "GUARDIAN  •  FRIDAY FALLBACK  •  ACCESSIBILITY\nVoice profile and Close-chat memory are managed locally.\nEnglish dictionary: say 'meaning <word>' or 'معنى <word>'.",
+                "الحارس • فرايداي الاحتياطية • إمكانية الوصول\nملف الصوت وذاكرة الكلوز محفوظان محلياً.\nالقاموس: قول معنى ثم الكلمة بالإنجليزي."
+            )
             textSize = 11f
             setTextColor(textSecondary)
             gravity = Gravity.CENTER
