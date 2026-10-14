@@ -105,7 +105,10 @@ class FridayFallbackService : Service() {
         if (listening) return
         listening = true
         try {
-            if (!input.startListening()) scheduleListen()
+            if (!input.startListening()) {
+                if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+                else listening = false
+            }
         } catch (_: Exception) {
             scheduleListen()
         }
