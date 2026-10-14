@@ -50,7 +50,12 @@ object AssistantLanguage {
             "لم أستطع الإرسال من التطبيق الحالي" to "I could not send from the current app.",
             "تم الإيقاف" to "Stopped.",
             "تم إيقاف الوضع السري" to "Secret mode is off.",
-            "لا يوجد نص مقروء من التطبيق الحالي" to "There is no readable text in the current app."
+            "لا يوجد نص مقروء من التطبيق الحالي" to "There is no readable text in the current app.",
+            "تم تسجيل صوت المالك" to "Owner voice profile saved.",
+            "لم أستطع فتح واتساب" to "I could not open WhatsApp.",
+            "لم أستطع فتح انستجرام" to "I could not open Instagram.",
+            "لم أستطع فتح فيسبوك" to "I could not open Facebook.",
+            "فعّل خدمة التحكم في التطبيقات أولاً" to "Enable app control first."
         )
         exact[text]?.let { return it }
         return when {
@@ -94,6 +99,7 @@ object AssistantLanguage {
             "STOP FRIDAY" to "إيقاف فرايداي",
             "MICROPHONE PERMISSIONS" to "أذونات الميكروفون",
             "BACK TO ASSISTANT SELECTOR" to "العودة لاختيار المساعد",
+            "Speech recognition unavailable. Check Google speech services and microphone permission." to "التعرّف على الكلام غير متاح. تأكد من خدمات الكلام وإذن الميكروفون.",
             "GUARDIAN  •  FRIDAY FALLBACK  •  ACCESSIBILITY\\nVoice profile and Close-chat memory are managed locally.\\nEnglish dictionary: say 'meaning <word>' or 'معنى <word>'." to "الحارس • فرايداي الاحتياطية • إمكانية الوصول\\nملف الصوت وذاكرة الكلوز محفوظان محلياً.\\nالقاموس: قول معنى ثم الكلمة بالإنجليزي.",
             "GUARDIAN  •  FRIDAY FALLBACK  •  ACCESSIBILITY\nVoice profile and Close-chat memory are managed locally.\nEnglish dictionary: say 'meaning <word>' or 'معنى <word>'." to "الحارس • فرايداي الاحتياطية • إمكانية الوصول\nملف الصوت وذاكرة الكلوز محفوظان محلياً.\nالقاموس: قول معنى ثم الكلمة بالإنجليزي."
         )
