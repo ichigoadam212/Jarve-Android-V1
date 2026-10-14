@@ -12,6 +12,7 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Space
+import android.widget.ScrollView
 import android.widget.TextView
 import com.ichigoadam.jarvis.JarvisService
 import com.ichigoadam.jarvis.MainActivity
@@ -148,7 +149,11 @@ class FridayActivity : Activity() {
         back.setOnClickListener { finish() }
         root.addView(back, lp(-1, 48, 18))
 
-        setContentView(root)
+        val scroll = ScrollView(this).apply {
+            isFillViewport = true
+            addView(root)
+        }
+        setContentView(scroll)
     }
 
     private fun actionButton(label: String) = Button(this).apply {
