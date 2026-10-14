@@ -16,6 +16,7 @@ import android.widget.TextView
 import com.ichigoadam.jarvis.JarvisService
 import com.ichigoadam.jarvis.MainActivity
 import com.ichigoadam.jarvis.guardian.GuardianService
+import com.ichigoadam.jarvis.voice.AssistantLanguage
 
 /** A separate FRIDAY screen and control surface. */
 class FridayActivity : Activity() {
@@ -50,14 +51,20 @@ class FridayActivity : Activity() {
         root.addView(heading, lp(-1, -2))
 
         val subtitle = TextView(this).apply {
-            text = "INDEPENDENT ASSISTANT  •  FALLBACK READY"
+            text = AssistantLanguage.ui(this, "INDEPENDENT ASSISTANT  •  FALLBACK READY", "مساعدة مستقلة • جاهزة للعمل الاحتياطي")
             textSize = 10f
             letterSpacing = 0.06f
             gravity = Gravity.CENTER
             setTextColor(secondary)
         }
         root.addView(subtitle, lp(-1, -2, 8))
-        root.addView(Space(this), lp(1, 28))
+        val language = actionButton(if (AssistantLanguage.isArabic(this)) "English" else "العربية")
+        language.setOnClickListener {
+            AssistantLanguage.toggle(this)
+            buildInterface()
+        }
+        root.addView(language, lp(-1, 42, 12))
+        root.addView(Space(this), lp(1, 18))
 
         val core = TextView(this).apply {
             text = "FRIDAY"
@@ -70,7 +77,7 @@ class FridayActivity : Activity() {
         root.addView(core, lp(176, 176))
 
         state = TextView(this).apply {
-            text = "●  STANDBY"
+            text = AssistantLanguage.ui(this, "●  STANDBY", "● في وضع الاستعداد")
             textSize = 13f
             gravity = Gravity.CENTER
             setTextColor(accent)
@@ -78,7 +85,7 @@ class FridayActivity : Activity() {
         root.addView(state, lp(-1, -2, 22))
 
         status = TextView(this).apply {
-            text = "FRIDAY is ready. Start it to take over the microphone from JARVIS."
+            text = AssistantLanguage.ui(this, "FRIDAY is ready. Start it to take over the microphone from JARVIS.", "أنا فرايداي، جاهزة. فعّليني لاستلام الميكروفون من جارفيس.")
             textSize = 13f
             gravity = Gravity.CENTER
             setTextColor(secondary)
@@ -96,8 +103,8 @@ class FridayActivity : Activity() {
             // Mark JARVIS stop as intentional so Guardian does not restart it over FRIDAY.
             JarvisService.stop(this)
             FridayFallbackService.start(this)
-            state.text = "●  FRIDAY ACTIVE"
-            status.text = "FRIDAY is active in its own process. Only FRIDAY should hold the microphone."
+            state.text = AssistantLanguage.ui(this, "●  FRIDAY ACTIVE", "● فرايداي نشطة")
+            status.text = AssistantLanguage.ui(this, "FRIDAY is active in its own process. Only FRIDAY should hold the microphone.", "فرايداي نشطة في عملية مستقلة. المفروض فرايداي وحدها تستخدم الميكروفون.")
         }
         root.addView(start, lp(-1, 54, 16))
 
@@ -105,8 +112,8 @@ class FridayActivity : Activity() {
         resume.setOnClickListener {
             JarvisService.start(this)
             startForegroundService(Intent(this, GuardianService::class.java))
-            state.text = "●  JARVIS RESUMING"
-            status.text = "JARVIS is being started. FRIDAY will stop as JARVIS takes control."
+            state.text = AssistantLanguage.ui(this, "●  JARVIS RESUMING", "● جارفيس يستعيد التحكم")
+            status.text = AssistantLanguage.ui(this, "JARVIS is being started. FRIDAY will stop as JARVIS takes control.", "جاري تشغيل جارفيس. ستتوقف فرايداي عندما يستعيد التحكم.")
         }
         root.addView(resume, lp(-1, 54, 10))
 
@@ -114,7 +121,7 @@ class FridayActivity : Activity() {
         stop.setOnClickListener {
             FridayFallbackService.stop(this)
             state.text = "●  STANDBY"
-            status.text = "FRIDAY stopped. Select JARVIS to resume the primary assistant."
+            status.text = AssistantLanguage.ui(this, "FRIDAY stopped. Select JARVIS to resume the primary assistant.", "تم إيقاف فرايداي. اختار جارفيس لاستئناف المساعد الأساسي.")
         }
         root.addView(stop, lp(-1, 54, 10))
 
@@ -132,7 +139,7 @@ class FridayActivity : Activity() {
     }
 
     private fun actionButton(label: String) = Button(this).apply {
-        text = label
+        text = AssistantLanguage.ui(this@FridayActivity, label)
         textSize = 11f
         isAllCaps = false
         gravity = Gravity.CENTER
