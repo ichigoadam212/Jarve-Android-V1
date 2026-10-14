@@ -100,6 +100,8 @@ class VoiceInput(
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
 
+    fun canListen(): Boolean = recognizer != null
+
     fun isRecognitionAvailable(): Boolean =
         try {
             SpeechRecognizer.isRecognitionAvailable(appContext)
