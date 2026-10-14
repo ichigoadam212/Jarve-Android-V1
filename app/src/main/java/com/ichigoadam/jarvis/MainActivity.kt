@@ -15,12 +15,14 @@ import android.widget.ScrollView
 import android.widget.Space
 import android.widget.TextView
 import com.ichigoadam.jarvis.core.JarvisController
+import com.ichigoadam.jarvis.voice.AssistantLanguage
 import com.ichigoadam.jarvis.guardian.GuardianService
 
 class MainActivity : Activity() {
     private var controller: JarvisController? = null
     private lateinit var status: TextView
     private lateinit var coreState: TextView
+    private var showingSelector = true
 
     private val background = Color.rgb(8, 12, 18)
     private val panel = Color.rgb(15, 21, 30)
@@ -34,6 +36,7 @@ class MainActivity : Activity() {
     }
 
     private fun buildSelector() {
+        showingSelector = true
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
@@ -51,7 +54,7 @@ class MainActivity : Activity() {
         root.addView(title, lp(-1, -2))
 
         val subtitle = TextView(this).apply {
-            text = "SELECT YOUR ASSISTANT"
+            text = AssistantLanguage.ui(this, "SELECT YOUR ASSISTANT", "اختار المساعد")
             textSize = 12f
             letterSpacing = 0.16f
             gravity = Gravity.CENTER
@@ -71,17 +74,24 @@ class MainActivity : Activity() {
         root.addView(friday, lp(-1, 62, top = 14))
 
         val note = TextView(this).apply {
-            text = "Separate interfaces • Independent state • Guardian failover"
+            text = AssistantLanguage.ui(this, "Separate interfaces • Independent state • Guardian failover", "واجهتان منفصلتان • حالة مستقلة • حماية واستعادة")
             textSize = 11f
             gravity = Gravity.CENTER
             setTextColor(textSecondary)
             setPadding(8.dp(), 22.dp(), 8.dp(), 0)
         }
         root.addView(note, lp(-1, -2))
+        val language = actionButton(if (AssistantLanguage.isArabic(this)) "English" else "العربية")
+        language.setOnClickListener {
+            AssistantLanguage.toggle(this)
+            if (showingSelector) buildSelector() else buildInterface()
+        }
+        root.addView(language, lp(-1, 44, top = 18))
         setContentView(root)
     }
 
     private fun buildInterface() {
+        showingSelector = false
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
@@ -104,7 +114,7 @@ class MainActivity : Activity() {
         content.addView(header, lp(-1, -2))
 
         val subtitle = TextView(this).apply {
-            text = "ANDROID V1  •  CORE CONTROL"
+            text = AssistantLanguage.ui(this, "ANDROID V1  •  CORE CONTROL", "أندرويد V1 • التحكم الأساسي")
             textSize = 11f
             setTextColor(textSecondary)
             gravity = Gravity.CENTER
@@ -112,7 +122,13 @@ class MainActivity : Activity() {
         }
         content.addView(subtitle, lp(-1, -2))
 
-        content.addView(Space(this), lp(1, 26))
+        val language = actionButton(if (AssistantLanguage.isArabic(this)) "English" else "العربية")
+        language.setOnClickListener {
+            AssistantLanguage.toggle(this)
+            buildInterface()
+        }
+        content.addView(language, lp(-1, 42, top = 10))
+        content.addView(Space(this), lp(1, 18))
 
         // Reserved visual core: the final JARVIS image can be placed here later.
         val core = TextView(this).apply {
@@ -128,7 +144,7 @@ class MainActivity : Activity() {
         content.addView(Space(this), lp(1, 22))
 
         coreState = TextView(this).apply {
-            text = "●  CORE READY"
+            text = AssistantLanguage.ui(this, "●  CORE READY", "● النواة جاهزة")
             textSize = 13f
             setTextColor(accent)
             gravity = Gravity.CENTER
@@ -136,7 +152,7 @@ class MainActivity : Activity() {
         content.addView(coreState, lp(-1, -2))
 
         status = TextView(this).apply {
-            text = "JARVIS Android V1\nStatus: Ready"
+            text = AssistantLanguage.ui(this, "JARVIS Android V1\nStatus: Ready", "جارفيس أندرويد V1\nالحالة: جاهز")
             textSize = 14f
             setTextColor(textSecondary)
             gravity = Gravity.CENTER
@@ -155,8 +171,8 @@ class MainActivity : Activity() {
             }
             JarvisService.start(this)
             startForegroundService(Intent(this, GuardianService::class.java))
-            coreState.text = "●  CORE ONLINE"
-            status.text = "JARVIS Android V1\nStatus: Running + Guardian"
+            coreState.text = AssistantLanguage.ui(this, "●  CORE ONLINE", "● النواة تعمل")
+            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nStatus: Running + Guardian", "جارفيس أندرويد V1\nالحالة: يعمل مع الحارس")
         }
         content.addView(start, lp(-1, 54))
 
@@ -165,8 +181,8 @@ class MainActivity : Activity() {
             if (!hasAudioPermission()) {
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
             } else if (controller?.listen() == true) {
-                coreState.text = "●  LISTENING"
-                status.text = "JARVIS Android V1\nListening..."
+                coreState.text = AssistantLanguage.ui(this, "●  LISTENING", "● يستمع الآن")
+                status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nListening...", "جارفيس أندرويد V1\nأستمع الآن...")
             } else {
                 coreState.text = "●  CORE READY"
                 status.text = "JARVIS Android V1\nSpeech recognition unavailable. Check Google speech services and microphone permission."
@@ -179,15 +195,15 @@ class MainActivity : Activity() {
             if (!hasAudioPermission()) {
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
             } else {
-                status.text = "JARVIS Android V1\nSpeak naturally for about 3 seconds..."
+                status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nSpeak naturally for about 3 seconds...", "جارفيس أندرويد V1\nاتكلم بشكل طبيعي لمدة 3 ثوانٍ تقريباً...")
                 Thread {
                     val ok = controller?.enrollOwnerVoice() == true
                     runOnUiThread {
                         if (ok) {
-                            coreState.text = "●  OWNER VOICE READY"
-                            status.text = "JARVIS Android V1\nOwner voice profile stored locally"
+                            coreState.text = AssistantLanguage.ui(this, "●  OWNER VOICE READY", "● تم تسجيل صوت المالك")
+                            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nOwner voice profile stored locally", "جارفيس أندرويد V1\nتم حفظ بصمة صوت المالك على الجهاز")
                         } else {
-                            status.text = "JARVIS Android V1\nVoice enrollment failed"
+                            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nVoice enrollment failed", "جارفيس أندرويد V1\nتعذر تسجيل الصوت")
                         }
                     }
                 }.start()
@@ -204,8 +220,8 @@ class MainActivity : Activity() {
         val stop = actionButton("STOP JARVIS")
         stop.setOnClickListener {
             JarvisService.stop(this)
-            coreState.text = "●  CORE STANDBY"
-            status.text = "JARVIS Android V1\nStatus: Stopped"
+            coreState.text = AssistantLanguage.ui(this, "●  CORE STANDBY", "● النواة في وضع الاستعداد")
+            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nStatus: Stopped", "جارفيس أندرويد V1\nالحالة: متوقف")
         }
         content.addView(stop, lp(-1, 54, top = 10))
 
@@ -226,7 +242,7 @@ class MainActivity : Activity() {
 
     private fun actionButton(label: String): Button =
         Button(this).apply {
-            text = label
+            text = AssistantLanguage.ui(this@MainActivity, label)
             textSize = 12f
             setTextColor(textPrimary)
             gravity = Gravity.CENTER
