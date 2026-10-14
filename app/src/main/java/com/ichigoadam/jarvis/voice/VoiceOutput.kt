@@ -2,12 +2,12 @@ package com.ichigoadam.jarvis.voice
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
-import android.speech.tts.Voice
 import java.util.Locale
 
 /** Text-to-speech follows the language of the spoken text. FRIDAY prefers a female voice when installed. */
 class VoiceOutput(context: Context, private val preferFemaleVoice: Boolean = false) {
     private val appContext = context.applicationContext
+    private val ttsLock = Any()
     @Volatile private var initialized = false
     private val tts = TextToSpeech(appContext) { status ->
         initialized = status == TextToSpeech.SUCCESS
@@ -15,7 +15,6 @@ class VoiceOutput(context: Context, private val preferFemaleVoice: Boolean = fal
             synchronized(ttsLock) { configureVoice(if (preferFemaleVoice) "en-US" else AssistantLanguage.speechTag(appContext)) }
         }
     }
-    private val ttsLock = Any()
 
     fun speak(text: String) {
         if (text.isBlank()) return
