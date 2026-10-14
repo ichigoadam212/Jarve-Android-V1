@@ -58,7 +58,7 @@ class FridayFallbackService : Service() {
 
         startForeground(NOTIFICATION_ID, notification)
 
-        output = VoiceOutput(this)
+        output = VoiceOutput(this, preferFemaleVoice = true)
         fridayModule = FridayModule(applicationContext)
         input = VoiceInput(
             context = this,
@@ -74,7 +74,7 @@ class FridayFallbackService : Service() {
         if (normalized.isBlank()) return
 
         if (wakeWord.isWakeWord(normalized)) {
-            output.speak("نعم، فرايداي جاهزة")
+            output.speak(if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(this)) "نعم، فرايداي جاهزة" else "Yes, FRIDAY is ready.")
             return
         }
 
@@ -87,7 +87,7 @@ class FridayFallbackService : Service() {
             command == "start jarvis" ||
             command == "restart jarvis"
         ) {
-            output.speak("جاري إعادة التحكم إلى جارفيس")
+            output.speak(if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(this)) "جاري إعادة التحكم إلى جارفيس" else "Handing control back to JARVIS.")
             JarvisService.start(this)
             stopSelf()
             return
@@ -97,7 +97,7 @@ class FridayFallbackService : Service() {
         if (result.handled && result.response.isNotBlank()) {
             output.speak(result.response)
         } else {
-            output.speak("أنا فرايداي. أستطيع فحص حالة النظام وتنفيذ أوامر فرايداي المتاحة. قل: حالة فرايداي، أو حلل.")
+            output.speak(if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(this)) "أنا فرايداي، جاهزة لمساعدتك. أقدر أفحص حالة النظام. قولي: حالة فرايداي، أو حللي." else "I am FRIDAY, ready to help. I can check system status. Say: FRIDAY status, or analyze.")
         }
     }
 
