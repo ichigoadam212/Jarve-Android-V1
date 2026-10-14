@@ -37,7 +37,7 @@ class FridayActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(26.dp(), 34.dp(), 26.dp(), 30.dp())
-            setBackgroundColor(background)
+            setBackgroundColor(this@FridayActivity.background)
         }
 
         val heading = TextView(this).apply {
