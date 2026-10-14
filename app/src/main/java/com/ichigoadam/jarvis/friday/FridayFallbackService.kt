@@ -123,7 +123,10 @@ class FridayFallbackService : Service() {
                 return@postDelayed
             }
             try {
-                if (!input.startListening()) scheduleListen()
+                if (!input.startListening()) {
+                    if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+                    else listening = false
+                }
             } catch (_: Exception) {
                 scheduleListen()
             }
