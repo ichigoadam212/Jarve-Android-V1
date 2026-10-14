@@ -110,7 +110,8 @@ class FridayFallbackService : Service() {
                 else listening = false
             }
         } catch (_: Exception) {
-            scheduleListen()
+            if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+            else listening = false
         }
     }
 
@@ -128,7 +129,8 @@ class FridayFallbackService : Service() {
                     else listening = false
                 }
             } catch (_: Exception) {
-                scheduleListen()
+                if (input.canListen() && input.isRecognitionAvailable()) scheduleListen()
+                else listening = false
             }
         }, 500)
     }
