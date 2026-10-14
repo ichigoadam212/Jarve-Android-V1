@@ -4,10 +4,10 @@ import android.content.Context
 import com.ichigoadam.jarvis.core.JarvisHealthReader
 
 /**
- * Internal intelligence layer of JARVIS.
+ * FRIDAY's independent command and status module.
  *
- * FRIDAY is not a second assistant. JARVIS Core owns the user-facing
- * identity, permissions and final response.
+ * This module is called by FRIDAY's isolated fallback service and keeps
+ * FRIDAY's supported commands separate from JARVIS command handling.
  */
 class FridayModule(private val context: Context) {
 
@@ -24,11 +24,11 @@ class FridayModule(private val context: Context) {
                     handled = true,
                     response = if (health.running) {
                         if (health.appControlConnected)
-                            "وحدة التحليل جاهزة وخدمة التحكم متصلة"
+                            "فرايداي تعمل، وجارفيس متصل وخدمة التحكم في التطبيقات مفعلة"
                         else
-                            "وحدة التحليل جاهزة لكن خدمة التحكم غير مفعلة"
+                            "فرايداي تعمل، وجارفيس متصل لكن خدمة التحكم في التطبيقات غير مفعلة"
                     } else {
-                        "وحدة التحليل غير متاحة لأن جارفيس غير متصل"
+                        "فرايداي تعمل بشكل مستقل. جارفيس غير متصل حالياً، ويمكنني استلام الأوامر المدعومة."
                     }
                 )
             }
