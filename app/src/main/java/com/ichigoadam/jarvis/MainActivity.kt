@@ -54,7 +54,7 @@ class MainActivity : Activity() {
         root.addView(title, lp(-1, -2))
 
         val subtitle = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "SELECT YOUR ASSISTANT", "اختار المساعد")
+            text = AssistantLanguage.ui(this@MainActivity, "SELECT YOUR ASSISTANT", "اختار المساعد")
             textSize = 12f
             letterSpacing = 0.16f
             gravity = Gravity.CENTER
@@ -74,7 +74,7 @@ class MainActivity : Activity() {
         root.addView(friday, lp(-1, 62, top = 14))
 
         val note = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "Separate interfaces • Independent state • Guardian failover", "واجهتان منفصلتان • حالة مستقلة • حماية واستعادة")
+            text = AssistantLanguage.ui(this@MainActivity, "Separate interfaces • Independent state • Guardian failover", "واجهتان منفصلتان • حالة مستقلة • حماية واستعادة")
             textSize = 11f
             gravity = Gravity.CENTER
             setTextColor(textSecondary)
@@ -114,7 +114,7 @@ class MainActivity : Activity() {
         content.addView(header, lp(-1, -2))
 
         val subtitle = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "ANDROID V1  •  CORE CONTROL", "أندرويد V1 • التحكم الأساسي")
+            text = AssistantLanguage.ui(this@MainActivity, "ANDROID V1  •  CORE CONTROL", "أندرويد V1 • التحكم الأساسي")
             textSize = 11f
             setTextColor(textSecondary)
             gravity = Gravity.CENTER
@@ -144,7 +144,7 @@ class MainActivity : Activity() {
         content.addView(Space(this), lp(1, 22))
 
         coreState = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "●  CORE READY", "● النواة جاهزة")
+            text = AssistantLanguage.ui(this@MainActivity, "●  CORE READY", "● النواة جاهزة")
             textSize = 13f
             setTextColor(accent)
             gravity = Gravity.CENTER
@@ -152,7 +152,7 @@ class MainActivity : Activity() {
         content.addView(coreState, lp(-1, -2))
 
         status = TextView(this).apply {
-            text = AssistantLanguage.ui(this, "JARVIS Android V1\nStatus: Ready", "جارفيس أندرويد V1\nالحالة: جاهز")
+            text = AssistantLanguage.ui(this@MainActivity, "JARVIS Android V1\nStatus: Ready", "جارفيس أندرويد V1\nالحالة: جاهز")
             textSize = 14f
             setTextColor(textSecondary)
             gravity = Gravity.CENTER
@@ -171,8 +171,8 @@ class MainActivity : Activity() {
             }
             JarvisService.start(this)
             startForegroundService(Intent(this, GuardianService::class.java))
-            coreState.text = AssistantLanguage.ui(this, "●  CORE ONLINE", "● النواة تعمل")
-            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nStatus: Running + Guardian", "جارفيس أندرويد V1\nالحالة: يعمل مع الحارس")
+            coreState.text = AssistantLanguage.ui(this@MainActivity, "●  CORE ONLINE", "● النواة تعمل")
+            status.text = AssistantLanguage.ui(this@MainActivity, "JARVIS Android V1\nStatus: Running + Guardian", "جارفيس أندرويد V1\nالحالة: يعمل مع الحارس")
         }
         content.addView(start, lp(-1, 54))
 
@@ -181,10 +181,10 @@ class MainActivity : Activity() {
             if (!hasAudioPermission()) {
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
             } else if (controller?.listen() == true) {
-                coreState.text = AssistantLanguage.ui(this, "●  LISTENING", "● يستمع الآن")
-                status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nListening...", "جارفيس أندرويد V1\nأستمع الآن...")
+                coreState.text = AssistantLanguage.ui(this@MainActivity, "●  LISTENING", "● يستمع الآن")
+                status.text = AssistantLanguage.ui(this@MainActivity, "JARVIS Android V1\nListening...", "جارفيس أندرويد V1\nأستمع الآن...")
             } else {
-                coreState.text = AssistantLanguage.ui(this, "●  CORE READY", "● النواة جاهزة")
+                coreState.text = AssistantLanguage.ui(this@MainActivity, "●  CORE READY", "● النواة جاهزة")
                 status.text = AssistantLanguage.ui(
                     this,
                     "JARVIS Android V1\nSpeech recognition unavailable. Check Google speech services and microphone permission.",
@@ -199,15 +199,15 @@ class MainActivity : Activity() {
             if (!hasAudioPermission()) {
                 requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 10)
             } else {
-                status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nSpeak naturally for about 3 seconds...", "جارفيس أندرويد V1\nاتكلم بشكل طبيعي لمدة 3 ثوانٍ تقريباً...")
+                status.text = AssistantLanguage.ui(this@MainActivity, "JARVIS Android V1\nSpeak naturally for about 3 seconds...", "جارفيس أندرويد V1\nاتكلم بشكل طبيعي لمدة 3 ثوانٍ تقريباً...")
                 Thread {
                     val ok = controller?.enrollOwnerVoice() == true
                     runOnUiThread {
                         if (ok) {
-                            coreState.text = AssistantLanguage.ui(this, "●  OWNER VOICE READY", "● تم تسجيل صوت المالك")
-                            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nOwner voice profile stored locally", "جارفيس أندرويد V1\nتم حفظ بصمة صوت المالك على الجهاز")
+                            coreState.text = AssistantLanguage.ui(this@MainActivity, "●  OWNER VOICE READY", "● تم تسجيل صوت المالك")
+                            status.text = AssistantLanguage.ui(this@MainActivity, "JARVIS Android V1\nOwner voice profile stored locally", "جارفيس أندرويد V1\nتم حفظ بصمة صوت المالك على الجهاز")
                         } else {
-                            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nVoice enrollment failed", "جارفيس أندرويد V1\nتعذر تسجيل الصوت")
+                            status.text = AssistantLanguage.ui(this@MainActivity, "JARVIS Android V1\nVoice enrollment failed", "جارفيس أندرويد V1\nتعذر تسجيل الصوت")
                         }
                     }
                 }.start()
@@ -224,8 +224,8 @@ class MainActivity : Activity() {
         val stop = actionButton("STOP JARVIS")
         stop.setOnClickListener {
             JarvisService.stop(this)
-            coreState.text = AssistantLanguage.ui(this, "●  CORE STANDBY", "● النواة في وضع الاستعداد")
-            status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nStatus: Stopped", "جارفيس أندرويد V1\nالحالة: متوقف")
+            coreState.text = AssistantLanguage.ui(this@MainActivity, "●  CORE STANDBY", "● النواة في وضع الاستعداد")
+            status.text = AssistantLanguage.ui(this@MainActivity, "JARVIS Android V1\nStatus: Stopped", "جارفيس أندرويد V1\nالحالة: متوقف")
         }
         content.addView(stop, lp(-1, 54, top = 10))
 
