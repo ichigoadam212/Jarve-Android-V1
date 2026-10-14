@@ -94,6 +94,19 @@ class FridayActivity : Activity() {
         }
         root.addView(status, lp(-1, -2, 12))
 
+        val dictionaryHint = TextView(this).apply {
+            text = AssistantLanguage.ui(
+                this@FridayActivity,
+                "Offline English dictionary: say 'meaning word' or 'define word'.",
+                "قاموس إنجليزي بدون إنترنت: قولي «معنى» ثم الكلمة."
+            )
+            textSize = 11f
+            gravity = Gravity.CENTER
+            setTextColor(secondary)
+            setPadding(8.dp(), 10.dp(), 8.dp(), 10.dp())
+        }
+        root.addView(dictionaryHint, lp(-1, -2, 4))
+
         val start = actionButton("ACTIVATE FRIDAY")
         start.setOnClickListener {
             if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
