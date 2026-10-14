@@ -82,14 +82,15 @@ class JarvisController(private val context: Context) {
         val lower = command.lowercase()
 
         val dictionaryQuery = when {
-            lower.startsWith("معنى ") -> command.trim().substringAfter("معنى ").trim()
-            lower.startsWith("ترجم ") -> command.trim().substringAfter("ترجم ").trim()
-            lower.startsWith("قاموس ") -> command.trim().substringAfter("قاموس ").trim()
-            lower.startsWith("define ") -> command.trim().substringAfter("define ").trim()
-            lower.startsWith("dictionary ") -> command.trim().substringAfter("dictionary ").trim()
-            lower.startsWith("meaning ") -> command.trim().substringAfter("meaning ").trim()
+            lower.startsWith("معنى ") -> lower.substringAfter("معنى ").trim()
+            lower.startsWith("ترجم ") -> lower.substringAfter("ترجم ").trim()
+            lower.startsWith("قاموس ") -> lower.substringAfter("قاموس ").trim()
+            lower.startsWith("define ") -> lower.substringAfter("define ").trim()
+            lower.startsWith("dictionary ") -> lower.substringAfter("dictionary ").trim()
+            lower.startsWith("meaning ") -> lower.substringAfter("meaning ").trim()
             lower.startsWith("what does ") && lower.endsWith(" mean") ->
-                command.trim().substringAfter("what does ").removeSuffix(" mean").trim()
+                lower.substringAfter("what does ").removeSuffix(" mean").trim()
+            lower.startsWith("translate ") -> lower.substringAfter("translate ").trim()
             else -> ""
         }
         if (dictionaryQuery.isNotBlank()) {
