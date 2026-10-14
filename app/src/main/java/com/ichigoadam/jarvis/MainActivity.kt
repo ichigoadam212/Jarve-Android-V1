@@ -184,8 +184,12 @@ class MainActivity : Activity() {
                 coreState.text = AssistantLanguage.ui(this, "●  LISTENING", "● يستمع الآن")
                 status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nListening...", "جارفيس أندرويد V1\nأستمع الآن...")
             } else {
-                coreState.text = "●  CORE READY"
-                status.text = "JARVIS Android V1\nSpeech recognition unavailable. Check Google speech services and microphone permission."
+                coreState.text = AssistantLanguage.ui(this, "●  CORE READY", "● النواة جاهزة")
+                status.text = AssistantLanguage.ui(
+                    this,
+                    "JARVIS Android V1\nSpeech recognition unavailable. Check Google speech services and microphone permission.",
+                    "جارفيس أندرويد V1\nالتعرّف على الكلام غير متاح. تأكد من خدمات الكلام وإذن الميكروفون."
+                )
             }
         }
         content.addView(listen, lp(-1, 54, top = 10))
@@ -224,6 +228,10 @@ class MainActivity : Activity() {
             status.text = AssistantLanguage.ui(this, "JARVIS Android V1\nStatus: Stopped", "جارفيس أندرويد V1\nالحالة: متوقف")
         }
         content.addView(stop, lp(-1, 54, top = 10))
+
+        val back = actionButton("BACK TO ASSISTANT SELECTOR")
+        back.setOnClickListener { buildSelector() }
+        content.addView(back, lp(-1, 48, top = 10))
 
         content.addView(Space(this), lp(1, 22))
 
