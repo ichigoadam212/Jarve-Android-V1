@@ -15,14 +15,15 @@ class FridayModule(private val context: Context) {
         val normalized = command.trim().lowercase()
 
         val dictionaryQuery = when {
-            normalized.startsWith("معنى ") -> command.trim().substringAfter("معنى ").trim()
-            normalized.startsWith("ترجم ") -> command.trim().substringAfter("ترجم ").trim()
-            normalized.startsWith("قاموس ") -> command.trim().substringAfter("قاموس ").trim()
-            normalized.startsWith("define ") -> command.trim().substringAfter("define ").trim()
-            normalized.startsWith("dictionary ") -> command.trim().substringAfter("dictionary ").trim()
-            normalized.startsWith("meaning ") -> command.trim().substringAfter("meaning ").trim()
+            normalized.startsWith("معنى ") -> normalized.substringAfter("معنى ").trim()
+            normalized.startsWith("ترجم ") -> normalized.substringAfter("ترجم ").trim()
+            normalized.startsWith("قاموس ") -> normalized.substringAfter("قاموس ").trim()
+            normalized.startsWith("define ") -> normalized.substringAfter("define ").trim()
+            normalized.startsWith("dictionary ") -> normalized.substringAfter("dictionary ").trim()
+            normalized.startsWith("meaning ") -> normalized.substringAfter("meaning ").trim()
             normalized.startsWith("what does ") && normalized.endsWith(" mean") ->
-                command.trim().substringAfter("what does ").removeSuffix(" mean").trim()
+                normalized.substringAfter("what does ").removeSuffix(" mean").trim()
+            normalized.startsWith("translate ") -> normalized.substringAfter("translate ").trim()
             else -> ""
         }
         if (dictionaryQuery.isNotBlank()) {
