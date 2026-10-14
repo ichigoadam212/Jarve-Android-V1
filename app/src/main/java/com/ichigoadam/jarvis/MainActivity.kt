@@ -30,7 +30,55 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        buildInterface()
+        buildSelector()
+    }
+
+    private fun buildSelector() {
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(28.dp(), 32.dp(), 28.dp(), 32.dp())
+            setBackgroundColor(background)
+        }
+
+        val title = TextView(this).apply {
+            text = "J A R V I S  /  F R I D A Y"
+            textSize = 23f
+            letterSpacing = 0.08f
+            gravity = Gravity.CENTER
+            setTextColor(textPrimary)
+        }
+        root.addView(title, lp(-1, -2))
+
+        val subtitle = TextView(this).apply {
+            text = "SELECT YOUR ASSISTANT"
+            textSize = 12f
+            letterSpacing = 0.16f
+            gravity = Gravity.CENTER
+            setTextColor(textSecondary)
+        }
+        root.addView(subtitle, lp(-1, -2, top = 10))
+        root.addView(Space(this), lp(1, 32))
+
+        val jarvis = actionButton("JARVIS  •  PRIMARY ASSISTANT")
+        jarvis.setOnClickListener { buildInterface() }
+        root.addView(jarvis, lp(-1, 62))
+
+        val friday = actionButton("F.R.I.D.A.Y.  •  INDEPENDENT ASSISTANT")
+        friday.setOnClickListener {
+            startActivity(Intent(this, com.ichigoadam.jarvis.friday.FridayActivity::class.java))
+        }
+        root.addView(friday, lp(-1, 62, top = 14))
+
+        val note = TextView(this).apply {
+            text = "Separate interfaces • Independent state • Guardian failover"
+            textSize = 11f
+            gravity = Gravity.CENTER
+            setTextColor(textSecondary)
+            setPadding(8.dp(), 22.dp(), 8.dp(), 0)
+        }
+        root.addView(note, lp(-1, -2))
+        setContentView(root)
     }
 
     private fun buildInterface() {
