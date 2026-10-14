@@ -14,6 +14,27 @@ class FridayModule(private val context: Context) {
     fun analyze(command: String): FridayResult {
         val normalized = command.trim().lowercase()
 
+        val dictionaryQuery = when {
+            normalized.startsWith("معنى ") -> command.trim().substringAfter("معنى ").trim()
+            normalized.startsWith("ترجم ") -> command.trim().substringAfter("ترجم ").trim()
+            normalized.startsWith("قاموس ") -> command.trim().substringAfter("قاموس ").trim()
+            normalized.startsWith("define ") -> command.trim().substringAfter("define ").trim()
+            normalized.startsWith("dictionary ") -> command.trim().substringAfter("dictionary ").trim()
+            normalized.startsWith("meaning ") -> command.trim().substringAfter("meaning ").trim()
+            normalized.startsWith("what does ") && normalized.endsWith(" mean") ->
+                command.trim().substringAfter("what does ").removeSuffix(" mean").trim()
+            else -> ""
+        }
+        if (dictionaryQuery.isNotBlank()) {
+            val found = com.ichigoadam.jarvis.memory.EnglishDictionary.lookup(dictionaryQuery)
+            return FridayResult(
+                handled = true,
+                response = found ?: if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
+                    "مش لاقية الكلمة دي في القاموس المحلي حالياً."
+                else "I couldn't find that word in the offline dictionary yet."
+            )
+        }
+
         return when {
             normalized == "friday status" ||
             normalized == "status" ||
