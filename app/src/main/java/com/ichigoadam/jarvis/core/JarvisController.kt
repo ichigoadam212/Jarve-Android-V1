@@ -93,7 +93,7 @@ class JarvisController(private val context: Context) {
             else -> ""
         }
         if (dictionaryQuery.isNotBlank()) {
-            val found = com.ichigoadam.jarvis.memory.EnglishDictionary.lookup(dictionaryQuery)
+            val found = com.ichigoadam.jarvis.memory.EnglishDictionary.lookup(dictionaryQuery, com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
             if (!secretMode) output.speak(found ?: if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
                 "مش لاقي الكلمة دي في القاموس المحلي حالياً."
             else "I couldn't find that word in the offline dictionary yet.")
