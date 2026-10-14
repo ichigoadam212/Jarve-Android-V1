@@ -33,16 +33,30 @@ class VoiceInput(
     init {
         recognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onResults(results: Bundle?) {
-                results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    ?.firstOrNull()
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let(onResult)
-                onSessionFinished()
+                try {
+                    results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                        ?.firstOrNull()
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { recognizedText ->
+                            try {
+                                onResult(recognizedText)
+                            } catch (_: Exception) {
+                                // A command handler must never crash Android's speech callback.
+                            }
+                        }
+                } finally {
+                    safelyFinishSession()
+                }
             }
 
             override fun onError(error: Int) {
-                onError(error)
-                onSessionFinished()
+                try {
+                    onError.invoke(error)
+                } catch (_: Exception) {
+                    // Keep recognition alive even if an error observer fails.
+                } finally {
+                    safelyFinishSession()
+                }
             }
 
             override fun onReadyForSpeech(params: Bundle?) {}
@@ -53,6 +67,14 @@ class VoiceInput(
             override fun onPartialResults(partialResults: Bundle?) {}
             override fun onEvent(eventType: Int, params: Bundle?) {}
         })
+    }
+
+    private fun safelyFinishSession() {
+        try {
+            onSessionFinished()
+        } catch (_: Exception) {
+            // Speech callbacks are invoked by Android; never let app code crash that thread.
+        }
     }
 
     fun startListening(language: String = "ar-EG"): Boolean {
