@@ -81,6 +81,25 @@ class JarvisController(private val context: Context) {
 
         val lower = command.lowercase()
 
+        val dictionaryQuery = when {
+            lower.startsWith("معنى ") -> command.trim().substringAfter("معنى ").trim()
+            lower.startsWith("ترجم ") -> command.trim().substringAfter("ترجم ").trim()
+            lower.startsWith("قاموس ") -> command.trim().substringAfter("قاموس ").trim()
+            lower.startsWith("define ") -> command.trim().substringAfter("define ").trim()
+            lower.startsWith("dictionary ") -> command.trim().substringAfter("dictionary ").trim()
+            lower.startsWith("meaning ") -> command.trim().substringAfter("meaning ").trim()
+            lower.startsWith("what does ") && lower.endsWith(" mean") ->
+                command.trim().substringAfter("what does ").removeSuffix(" mean").trim()
+            else -> ""
+        }
+        if (dictionaryQuery.isNotBlank()) {
+            val found = com.ichigoadam.jarvis.memory.EnglishDictionary.lookup(dictionaryQuery)
+            if (!secretMode) output.speak(found ?: if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
+                "مش لاقي الكلمة دي في القاموس المحلي حالياً."
+            else "I couldn't find that word in the offline dictionary yet.")
+            return
+        }
+
         if (lower == "status" || lower == "الحالة") {
             if (!secretMode) {
                 val running = JarvisHealthReader.read(context)
