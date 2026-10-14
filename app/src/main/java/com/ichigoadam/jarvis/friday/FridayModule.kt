@@ -26,7 +26,7 @@ class FridayModule(private val context: Context) {
             else -> ""
         }
         if (dictionaryQuery.isNotBlank()) {
-            val found = com.ichigoadam.jarvis.memory.EnglishDictionary.lookup(dictionaryQuery)
+            val found = com.ichigoadam.jarvis.memory.EnglishDictionary.lookup(dictionaryQuery, com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
             return FridayResult(
                 handled = true,
                 response = found ?: if (com.ichigoadam.jarvis.voice.AssistantLanguage.isArabic(context))
