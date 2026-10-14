@@ -24,6 +24,42 @@ object AssistantLanguage {
 
     fun speechTag(context: Context): String = if (isArabic(context)) "ar-EG" else "en-US"
 
+    /** Translate only known assistant phrases; arbitrary user/app text is left untouched. */
+    fun localizeSpeech(context: Context, text: String): String {
+        if (isArabic(context)) return text
+        val exact = mapOf(
+            "نعم" to "Yes.",
+            "سجل بصمة صوت المالك أولاً من إعدادات جارفيس" to "Please enroll the owner's voice from JARVIS settings first.",
+            "لم يتم التحقق من صوت المالك" to "The owner's voice could not be verified.",
+            "جارفيس متصل وخدمة التحكم في التطبيقات مفعلة" to "JARVIS is connected and app control is enabled.",
+            "جارفيس متصل لكن خدمة التحكم في التطبيقات غير مفعلة" to "JARVIS is connected, but app control is not enabled.",
+            "جارفيس غير متصل" to "JARVIS is not connected.",
+            "تمت إضافة الشات للكلوز" to "The chat was added to Close Chat.",
+            "افتح الشات أولاً ثم أعطني الأمر" to "Open the chat first, then give me the command.",
+            "تمت إزالة الشات من الكلوز" to "The chat was removed from Close Chat.",
+            "افتح الشات أولاً" to "Open the chat first.",
+            "تم تحليل سجل الشات وحفظه محلياً" to "The chat history was analyzed and saved locally.",
+            "لم أستطع قراءة سجل الشات" to "I could not read the chat history.",
+            "تم تشغيل الرد التلقائي للكلوز" to "Close Chat auto-replies are on.",
+            "تم إيقاف الرد التلقائي للكلوز" to "Close Chat auto-replies are off.",
+            "الشات ده مش مضاف للكلوز" to "This chat is not in Close Chat.",
+            "تم الإرسال" to "Sent.",
+            "قل نص الرد بعد كلمة رد" to "Say the reply text after the word reply.",
+            "خدمة التحكم في التطبيقات غير مفعلة" to "App control is not enabled.",
+            "فعّل خدمة التحكم في التطبيقات أولاً" to "Enable app control first.",
+            "لم أستطع الإرسال من التطبيق الحالي" to "I could not send from the current app.",
+            "تم الإيقاف" to "Stopped.",
+            "تم إيقاف الوضع السري" to "Secret mode is off.",
+            "لا يوجد نص مقروء من التطبيق الحالي" to "There is no readable text in the current app."
+        )
+        exact[text]?.let { return it }
+        return when {
+            text.startsWith("تم فتح ") -> "Opened " + text.removePrefix("تم فتح ")
+            text.startsWith("لم أستطع فتح ") -> "I could not open " + text.removePrefix("لم أستطع فتح ")
+            else -> text
+        }
+    }
+
     fun ui(context: Context, english: String, arabic: String): String =
         if (isArabic(context)) arabic else english
 
