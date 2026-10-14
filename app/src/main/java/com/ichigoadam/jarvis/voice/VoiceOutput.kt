@@ -30,6 +30,8 @@ class VoiceOutput(context: Context, private val preferFemaleVoice: Boolean = fal
         val locale = Locale.forLanguageTag(languageTag)
         tts.language = locale
         if (!preferFemaleVoice) return
+        // Prefer a named female voice; slightly raise pitch if the engine exposes no gender-labelled voice.
+        tts.setPitch(1.12f)
         val languagePrefix = locale.language
         val choices = tts.voices.orEmpty().filter { it.locale.language == languagePrefix }
         val female = choices.firstOrNull {
